@@ -257,6 +257,50 @@
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+    /* Dashboard 6 — Escenarios */
+    .sc-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
+    .sc-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; }
+    .sc-card-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+    .sc-base-kpis { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 18px; }
+    .sc-base-kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 13px 15px; border-top: 3px solid; }
+    .sc-base-label { font-size: 10.5px; color: var(--text-muted); font-weight: 600; margin-bottom: 5px; }
+    .sc-base-val { font-size: 18px; font-weight: 800; }
+    .sc-base-sub { font-size: 10px; color: var(--text-muted); margin-top: 3px; }
+    .sc-form { display: flex; flex-direction: column; gap: 10px; }
+    .sc-field { display: flex; flex-direction: column; gap: 4px; }
+    .sc-label { font-size: 10px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+    .sc-inp { background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; padding: 8px 11px; color: var(--text); font-size: 13px; outline: none; transition: border-color .15s; width: 100%; box-sizing: border-box; }
+    .sc-inp:focus { border-color: var(--accent); }
+    .sc-btn { background: var(--accent); border: none; border-radius: 8px; color: #fff; font-size: 13px; font-weight: 700; padding: 10px 0; cursor: pointer; width: 100%; margin-top: 4px; transition: opacity .15s; }
+    .sc-btn:hover { opacity: .85; }
+    .sc-btn.green { background: var(--accent3); color: #111; }
+    .sc-result { margin-top: 14px; border-top: 1px solid var(--border); padding-top: 14px; }
+    .sc-result-kpis { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 12px; }
+    .sc-rk { background: var(--surface2); border-radius: 8px; padding: 10px 12px; text-align: center; }
+    .sc-rk-label { font-size: 9.5px; color: var(--text-muted); font-weight: 600; margin-bottom: 4px; }
+    .sc-rk-val { font-size: 15px; font-weight: 800; }
+    .sc-rec-list { display: flex; flex-direction: column; gap: 7px; }
+    .sc-rec { border-radius: 8px; padding: 10px 13px; font-size: 12px; line-height: 1.5; border-left: 3px solid; }
+    .sc-rec.red { background: rgba(239,68,68,.08); border-color: var(--accent5); color: var(--text); }
+    .sc-rec.yellow { background: rgba(245,158,11,.08); border-color: var(--accent4); color: var(--text); }
+    .sc-rec.green { background: rgba(16,185,129,.08); border-color: var(--accent3); color: var(--text); }
+    .sc-rec.blue { background: rgba(99,102,241,.08); border-color: var(--accent); color: var(--text); }
+    .sc-rec strong { display: block; margin-bottom: 2px; font-size: 11.5px; }
+    .sc-matrix { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+    .sc-matrix-card { border-radius: 10px; padding: 16px; border: 1px solid; }
+    .sc-matrix-card.red { background: rgba(239,68,68,.07); border-color: rgba(239,68,68,.25); }
+    .sc-matrix-card.yellow { background: rgba(245,158,11,.07); border-color: rgba(245,158,11,.25); }
+    .sc-matrix-card.green { background: rgba(16,185,129,.07); border-color: rgba(16,185,129,.25); }
+    .sc-matrix-title { font-size: 12px; font-weight: 700; margin-bottom: 10px; }
+    .sc-matrix-item { font-size: 11.5px; color: var(--text-muted); padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,.05); line-height: 1.45; }
+    .sc-matrix-item:last-child { border-bottom: none; }
+    .sc-matrix-item b { color: var(--text); }
+    .sc-semaforo { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; margin-bottom: 12px; }
+    .sc-semaforo.red { background: rgba(239,68,68,.15); color: var(--accent5); }
+    .sc-semaforo.yellow { background: rgba(245,158,11,.15); color: var(--accent4); }
+    .sc-semaforo.green { background: rgba(16,185,129,.15); color: var(--accent3); }
+    .sc-alloc { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+    .sc-alloc-chip { border-radius: 20px; padding: 4px 12px; font-size: 11px; font-weight: 700; }
     /* H2 Invoice Panel */
     .h2f-form-row { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
     .h2f-field { display: flex; flex-direction: column; gap: 4px; }
@@ -530,6 +574,9 @@
   </div>
   <div class="nav-tab" onclick="switchDash(5)" id="tab5">
     <span class="tab-icon">💰</span> CFO · Caja
+  </div>
+  <div class="nav-tab" onclick="switchDash(6)" id="tab6">
+    <span class="tab-icon">🎲</span> Escenarios
   </div>
 </nav>
 <div class="content-area">
@@ -1804,7 +1851,7 @@ function checkPassword() {
 }
 
 // ═══════════════ TAB SWITCHER ═══════════════
-const builtDash = [false,false,false,false,false,false];
+const builtDash = [false,false,false,false,false,false,false];
 
 function switchDash(i) {
   document.querySelectorAll('.nav-tab').forEach((t,j) => t.classList.toggle('active', i===j));
@@ -1817,6 +1864,7 @@ function switchDash(i) {
     if (i===3) initDash3();
     if (i===4) initDash4();
     if (i===5) initDash5();
+    if (i===6) initDash6();
   }
 }
 
@@ -4006,12 +4054,328 @@ function updateDirPeriod() {
 }
 
 // ═══════════════ INIT ═══════════════
+// ═══════════════════════════════════════════════════════════
+// DASHBOARD 6 — ESCENARIOS & DECISIONES
+// ═══════════════════════════════════════════════════════════
+function sc6GetBase() {
+  const burn = getCFOBurnMen ? getCFOBurnMen() : CFO_BURN_MEN;
+  const caja = getCFOCajaAct ? getCFOCajaAct() : CFO_CAJA_ACT;
+  const ahorro = typeof getDirAhorroAcum === 'function' ? getDirAhorroAcum() : 0;
+  const meses = activeMonths.length || 1;
+  const ingMensual = sumSlice(EER12.ingNetos) / meses;
+  const runway = burn > 0 ? Math.round(caja / burn * 30.44) : 0;
+  return { burn, caja, ahorro, ingMensual, runway };
+}
+
+function sc6BuildBase() {
+  const b = sc6GetBase();
+  const el = id => document.getElementById(id);
+  if (el('sc-ing-actual'))   el('sc-ing-actual').textContent   = fmtFull(Math.round(b.ingMensual));
+  if (el('sc-burn-actual'))  el('sc-burn-actual').textContent  = fmtFull(Math.round(b.burn));
+  if (el('sc-ahorro-actual'))el('sc-ahorro-actual').textContent= fmtFull(Math.round(b.ahorro));
+  const rc = el('sc-runway-actual');
+  if (rc) {
+    rc.textContent = b.runway + 'd';
+    rc.style.color = b.runway >= 91 ? 'var(--accent3)' : b.runway >= 46 ? 'var(--accent4)' : 'var(--accent5)';
+  }
+}
+
+function sc6BuildClienteSelect() {
+  const sel = document.getElementById('sc-cliente-sel');
+  if (!sel) return;
+  // Group FACTURAS by client, compute H1 monthly average
+  const byClient = {};
+  FACTURAS.forEach(f => {
+    if (f.neto > 0) byClient[f.cliente] = (byClient[f.cliente] || 0) + f.neto;
+  });
+  const sorted = Object.entries(byClient).sort((a,b)=>b[1]-a[1]);
+  sel.innerHTML = '<option value="">— Elige un cliente —</option>' +
+    sorted.map(([name, total]) =>
+      `<option value="${Math.round(total/6)}" data-name="${name.replace(/"/g,'&quot;')}">${name.substring(0,50)} — ${fmtFull(Math.round(total/6))}/mes</option>`
+    ).join('');
+}
+
+function sc6ClienteChange() {
+  const sel = document.getElementById('sc-cliente-sel');
+  const inp = document.getElementById('sc-cliente-monto');
+  if (!sel || !inp) return;
+  const val = sel.value;
+  if (val) {
+    const n = parseInt(val);
+    inp.value = n.toLocaleString('es-CL');
+  } else {
+    inp.value = '';
+  }
+  document.getElementById('sc-loss-result').style.display = 'none';
+}
+
+function runScenarioLoss() {
+  const b = sc6GetBase();
+  const clienteMonto = parseInp('sc-cliente-monto');
+  if (!clienteMonto) { alert('Selecciona un cliente o ingresa un monto.'); return; }
+  const newIng     = Math.max(0, b.ingMensual - clienteMonto);
+  const deficit    = b.burn - newIng;
+  const newRunway  = b.burn > 0 ? Math.round(b.caja / b.burn * 30.44) : 0;
+  const mesesReserva = deficit > 0 && b.ahorro > 0 ? (b.ahorro / deficit).toFixed(1) : '∞';
+  const pctPerdida = b.ingMensual > 0 ? (clienteMonto / b.ingMensual * 100).toFixed(0) : 0;
+  const severity   = deficit > 0 ? (deficit > b.burn * 0.3 ? 'red' : 'yellow') : 'green';
+
+  const labels = { red: '🔴 Riesgo Alto', yellow: '🟡 Riesgo Moderado', green: '🟢 Impacto Manejable' };
+  document.getElementById('sc-loss-semaforo').className = 'sc-semaforo ' + severity;
+  document.getElementById('sc-loss-semaforo').textContent = labels[severity];
+  document.getElementById('sc-loss-ing').textContent    = fmtFull(Math.round(newIng));
+  document.getElementById('sc-loss-runway').textContent = newRunway + ' días';
+  document.getElementById('sc-loss-reserva').textContent = deficit > 0 ? mesesReserva + ' meses' : 'No necesaria';
+
+  const recs = [];
+  if (deficit > 0) {
+    recs.push({ cls:'red', title:'⚡ Déficit mensual de ' + fmtFull(Math.round(deficit)),
+      body:'Sin este cliente los egresos superan los ingresos en ' + fmtFull(Math.round(deficit)) + '/mes. La reserva cubre aproximadamente ' + mesesReserva + ' meses de ese déficit.' });
+    if (parseFloat(mesesReserva) < 2) {
+      recs.push({ cls:'red', title:'🚨 Acción inmediata requerida',
+        body:'Con menos de 2 meses de cobertura: (1) Acelerar pipeline de nuevos clientes. (2) Revisar gastos no esenciales. (3) Evaluar reducción temporal de honorarios.' });
+    }
+    recs.push({ cls:'yellow', title:'🔁 Diversificar cartera',
+      body:'Este cliente representa el ' + pctPerdida + '% del ingreso mensual. La concentración de revenue en pocos clientes es el principal riesgo operacional. Meta: ningún cliente debe superar el 25% del revenue.' });
+    recs.push({ cls:'blue', title:'📞 Reemplazar el ingreso perdido',
+      body:'Para compensar, necesitas ' + Math.ceil(clienteMonto / 1500000) + ' cliente(s) nuevo(s) a ticket promedio $1,5M/mes, o recuperar ' + fmtFull(Math.round(clienteMonto)) + ' en ticket adicional de la cartera actual.' });
+  } else {
+    recs.push({ cls:'green', title:'✅ Impacto absorbible',
+      body:'Con los ingresos restantes se cubre el burn rate. Sin embargo, el margen se reduciría en ' + fmtFull(Math.round(clienteMonto)) + '/mes. Se recomienda reponer este ingreso en los próximos 60 días.' });
+    recs.push({ cls:'blue', title:'🎯 Oportunidad de optimización',
+      body:'Usa el tiempo de gestión liberado para elevar el ticket promedio de clientes existentes o cerrar un nuevo cliente de mayor valor.' });
+  }
+  document.getElementById('sc-loss-recs').innerHTML = recs.map(r =>
+    `<div class="sc-rec ${r.cls}"><strong>${r.title}</strong>${r.body}</div>`
+  ).join('');
+  document.getElementById('sc-loss-result').style.display = 'block';
+}
+
+function runScenarioGain() {
+  const b = sc6GetBase();
+  const monto = parseInp('sc-new-monto');
+  const tipo  = document.getElementById('sc-new-tipo').value;
+  const nombre = (document.getElementById('sc-new-nombre').value || 'Nuevo cliente').trim();
+  if (!monto) { alert('Ingresa el revenue mensual estimado del cliente.'); return; }
+
+  const newIng    = b.ingMensual + monto;
+  const newSurplus= newIng - b.burn;
+  const newRunway = b.burn > 0 ? Math.round((b.caja + monto) / b.burn * 30.44) : 0;
+  const anual     = tipo === 'rec' ? monto * 12 : monto;
+  const extraMensual = monto;
+
+  // Allocation recommendation
+  const toReserva = Math.round(extraMensual * 0.40);
+  const toInv     = Math.round(extraMensual * 0.30);
+  const toOp      = Math.round(extraMensual * 0.30);
+
+  document.getElementById('sc-gain-semaforo').className = 'sc-semaforo green';
+  document.getElementById('sc-gain-semaforo').textContent = '🟢 ' + (tipo === 'rec' ? 'Ingreso Recurrente' : 'Ingreso Excepcional');
+  document.getElementById('sc-gain-ing').textContent    = fmtFull(Math.round(newIng));
+  document.getElementById('sc-gain-runway').textContent = newRunway + ' días';
+  document.getElementById('sc-gain-anual').textContent  = fmtFull(Math.round(anual));
+
+  const allocColors = ['var(--accent3)', 'var(--accent4)', 'var(--accent)'];
+  const allocs = tipo === 'rec'
+    ? [
+        { label:'40% → Reserva de caja', val: toReserva, color: allocColors[0] },
+        { label:'30% → DAF / inversión', val: toInv, color: allocColors[1] },
+        { label:'30% → Colchón operacional', val: toOp, color: allocColors[2] }
+      ]
+    : [
+        { label:'50% → Reserva de caja', val: Math.round(monto*0.5), color: allocColors[0] },
+        { label:'30% → DAF 90–180 días', val: Math.round(monto*0.3), color: allocColors[1] },
+        { label:'20% → Capital trabajo', val: Math.round(monto*0.2), color: allocColors[2] }
+      ];
+  document.getElementById('sc-gain-alloc').innerHTML = allocs.map(a =>
+    `<span class="sc-alloc-chip" style="background:${a.color}22;color:${a.color};border:1px solid ${a.color}44">${a.label}: ${fmtFull(a.val)}</span>`
+  ).join('');
+
+  const recs = [];
+  if (tipo === 'rec') {
+    recs.push({ cls:'green', title:'💰 ' + fmtFull(Math.round(anual)) + ' adicionales al año',
+      body:'Con ' + nombre + ' como cliente recurrente, el ingreso mensual sube a ' + fmtFull(Math.round(newIng)) + '. El margen sobre burn rate sería de ' + fmtFull(Math.round(newSurplus)) + '/mes.' });
+    recs.push({ cls:'blue', title:'🏦 Asignación recomendada del excedente',
+      body:'40% (' + fmtFull(toReserva) + ') a reserva → acelera el objetivo de fondo. 30% (' + fmtFull(toInv) + ') a DAF 30–90 días ~6% anual. 30% (' + fmtFull(toOp) + ') como buffer operacional.' });
+    if (newSurplus > b.burn * 0.3) {
+      recs.push({ cls:'green', title:'📈 Considera inversión en crecimiento',
+        body:'Con este nivel de holgura, evalúa: contratar un comercial para escalar ventas, invertir en herramientas de productividad, o hacer DAF a 180 días para maximizar el retorno de la reserva.' });
+    }
+  } else {
+    recs.push({ cls:'yellow', title:'⚠️ Ingreso no recurrente — no lo presupuestes',
+      body:'Registra ' + fmtFull(Math.round(monto)) + ' como ingreso extraordinario. No ajustes el burn rate ni los compromisos fijos en base a este pago.' });
+    recs.push({ cls:'blue', title:'🔒 Distribución recomendada',
+      body:'50% (' + fmtFull(Math.round(monto*0.5)) + ') directo a reserva de caja. 30% (' + fmtFull(Math.round(monto*0.3)) + ') en DAF 90–180 días. 20% (' + fmtFull(Math.round(monto*0.2)) + ') disponible para capital de trabajo.' });
+    recs.push({ cls:'green', title:'🎯 Convierte lo excepcional en recurrente',
+      body:'Si el servicio fue bien recibido, propón un contrato mensual. Incluso a la mitad del valor, un cliente recurrente vale más que un pago único.' });
+  }
+  document.getElementById('sc-gain-recs').innerHTML = recs.map(r =>
+    `<div class="sc-rec ${r.cls}"><strong>${r.title}</strong>${r.body}</div>`
+  ).join('');
+  document.getElementById('sc-gain-result').style.display = 'block';
+}
+
+function sc6BuildDecisionMatrix() {
+  const b = sc6GetBase();
+  const surplus = b.ingMensual - b.burn;
+  const coverageMin = b.ahorro / b.burn; // months covered by savings
+  const el = document.getElementById('sc-decision-matrix');
+  if (!el) return;
+
+  const cols = [
+    {
+      cls: 'red', title: '🚨 Acciones Defensivas (Siempre)',
+      items: [
+        { b: 'Mantener fondo mínimo 1.5× burn', t: fmtFull(Math.round(b.burn * 1.5)) + ' — prioridad absoluta' },
+        { b: 'Runway < 45 días = alerta máxima', t: 'Hoy: ' + b.runway + 'd — ' + (b.runway < 45 ? '⚠️ ATENCIÓN' : '✅ OK') },
+        { b: 'Ningún cliente > 30% del revenue', t: 'Revisa concentración mensualmente' },
+        { b: 'Reserva antes que expansión', t: 'No crecer en gasto hasta tener 3× burn en caja' },
+      ]
+    },
+    {
+      cls: 'yellow', title: '⚖️ Decisiones de Equilibrio',
+      items: [
+        { b: 'Si surplus > 0', t: '40% reserva · 30% inversión · 30% operación' },
+        { b: 'Si pierdes 1 cliente top', t: 'Activar plan de reemplazo en máximo 30 días' },
+        { b: 'Si reserva > meta mínima', t: 'Evaluar DAF 30d (' + fmtFull(Math.round(b.ahorro * 0.2)) + ' al 6% anual)' },
+        { b: 'Ingreso excepcional', t: '50% reserva · 30% DAF · 20% trabajo' },
+      ]
+    },
+    {
+      cls: 'green', title: '🚀 Acciones de Crecimiento',
+      items: [
+        { b: 'Meta óptima reserva', t: fmtFull(Math.round(b.burn * 3)) + ' (3× burn) — ' + (b.ahorro >= b.burn * 3 ? '✅ Alcanzada' : fmtFull(Math.round(b.burn * 3 - b.ahorro)) + ' faltante') },
+        { b: 'Ticket promedio H1', t: fmtFull(Math.round(b.ingMensual / 17)) + '/cliente · escalar a 25+ clientes' },
+        { b: 'Con reserva óptima', t: 'DAF 180d · Fondo mutuo MM · Reinversión comercial' },
+        { b: 'Nuevo cliente objetivo', t: fmtFull(Math.round(Math.max(0, b.burn - b.ingMensual + 500000))) + '/mes mínimo para crecer margen' },
+      ]
+    }
+  ];
+
+  el.innerHTML = cols.map(c => `
+    <div class="sc-matrix-card ${c.cls}">
+      <div class="sc-matrix-title">${c.title}</div>
+      ${c.items.map(it => `<div class="sc-matrix-item"><b>${it.b}</b><br>${it.t}</div>`).join('')}
+    </div>
+  `).join('');
+}
+
+function initDash6() {
+  sc6BuildBase();
+  sc6BuildClienteSelect();
+  sc6BuildDecisionMatrix();
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   builtDash[0] = true;
   initDashDir();
   document.getElementById('d2-title-period').textContent = PERIOD_LABEL[activePeriod] || activePeriod;
 });
 </script>
+<div class="dashboard" id="dash5">
+  <div class="section-header">
+    <div class="section-title">🎲 Simulador de <span>Escenarios</span> & Decisiones Financieras</div>
+    <div class="section-sub">Analiza el impacto de cambios en tu cartera de clientes y obtén recomendaciones accionables</div>
+  </div>
+
+  <!-- BASE KPIs -->
+  <div class="sc-base-kpis">
+    <div class="sc-base-kpi" style="border-top-color:var(--accent2)">
+      <div class="sc-base-label">Ingreso Mensual Actual</div>
+      <div class="sc-base-val" id="sc-ing-actual" style="color:var(--accent2)">—</div>
+      <div class="sc-base-sub">Promedio período activo</div>
+    </div>
+    <div class="sc-base-kpi" style="border-top-color:var(--accent5)">
+      <div class="sc-base-label">Burn Rate Mensual</div>
+      <div class="sc-base-val" id="sc-burn-actual" style="color:var(--accent5)">—</div>
+      <div class="sc-base-sub">Egresos promedio</div>
+    </div>
+    <div class="sc-base-kpi" style="border-top-color:var(--accent4)">
+      <div class="sc-base-label">Runway Actual</div>
+      <div class="sc-base-val" id="sc-runway-actual" style="color:var(--accent4)">—</div>
+      <div class="sc-base-sub" id="sc-runway-sub">días con caja disponible</div>
+    </div>
+    <div class="sc-base-kpi" style="border-top-color:var(--accent3)">
+      <div class="sc-base-label">Reserva Acumulada</div>
+      <div class="sc-base-val" id="sc-ahorro-actual" style="color:var(--accent3)">—</div>
+      <div class="sc-base-sub">Fondo de reserva CFO</div>
+    </div>
+  </div>
+
+  <!-- SCENARIOS GRID -->
+  <div class="sc-grid2">
+
+    <!-- ESCENARIO A: PÉRDIDA DE CLIENTE -->
+    <div class="sc-card">
+      <div class="sc-card-title">🔴 ¿Qué pasa si pierdo un cliente?</div>
+      <div class="sc-form">
+        <div class="sc-field">
+          <span class="sc-label">Selecciona el cliente</span>
+          <select id="sc-cliente-sel" class="sc-inp" onchange="sc6ClienteChange()">
+            <option value="">— Elige un cliente —</option>
+          </select>
+        </div>
+        <div class="sc-field">
+          <span class="sc-label">Revenue mensual promedio del cliente ($)</span>
+          <input id="sc-cliente-monto" class="sc-inp" type="text" placeholder="Auto-calculado al seleccionar"
+            oninput="formatOnInput(this)" onblur="formatInp(this)">
+        </div>
+        <button class="sc-btn" onclick="runScenarioLoss()">Simular impacto →</button>
+      </div>
+      <div class="sc-result" id="sc-loss-result" style="display:none">
+        <div id="sc-loss-semaforo" class="sc-semaforo red"></div>
+        <div class="sc-result-kpis">
+          <div class="sc-rk"><div class="sc-rk-label">Nuevo Ingreso Mensual</div><div class="sc-rk-val" id="sc-loss-ing" style="color:var(--accent2)">—</div></div>
+          <div class="sc-rk"><div class="sc-rk-label">Nuevo Runway</div><div class="sc-rk-val" id="sc-loss-runway" style="color:var(--accent4)">—</div></div>
+          <div class="sc-rk"><div class="sc-rk-label">Meses cubiertos por reserva</div><div class="sc-rk-val" id="sc-loss-reserva" style="color:var(--accent3)">—</div></div>
+        </div>
+        <div class="sc-rec-list" id="sc-loss-recs"></div>
+      </div>
+    </div>
+
+    <!-- ESCENARIO B: NUEVO CLIENTE -->
+    <div class="sc-card">
+      <div class="sc-card-title">🟢 ¿Qué pasa si sumo un cliente?</div>
+      <div class="sc-form">
+        <div class="sc-field">
+          <span class="sc-label">Nombre del cliente potencial</span>
+          <input id="sc-new-nombre" class="sc-inp" type="text" placeholder="Ej: Empresa XYZ">
+        </div>
+        <div class="sc-field">
+          <span class="sc-label">Revenue mensual estimado ($)</span>
+          <input id="sc-new-monto" class="sc-inp" type="text" placeholder="1.000.000"
+            oninput="formatOnInput(this)" onblur="formatInp(this)">
+        </div>
+        <div class="sc-field">
+          <span class="sc-label">¿Ingreso recurrente o excepcional?</span>
+          <select id="sc-new-tipo" class="sc-inp">
+            <option value="rec">Recurrente (mensual)</option>
+            <option value="exc">Excepcional (pago único)</option>
+          </select>
+        </div>
+        <button class="sc-btn green" onclick="runScenarioGain()">Simular oportunidad →</button>
+      </div>
+      <div class="sc-result" id="sc-gain-result" style="display:none">
+        <div id="sc-gain-semaforo" class="sc-semaforo green"></div>
+        <div class="sc-result-kpis">
+          <div class="sc-rk"><div class="sc-rk-label">Nuevo Ingreso Mensual</div><div class="sc-rk-val" id="sc-gain-ing" style="color:var(--accent2)">—</div></div>
+          <div class="sc-rk"><div class="sc-rk-label">Nuevo Runway</div><div class="sc-rk-val" id="sc-gain-runway" style="color:var(--accent3)">—</div></div>
+          <div class="sc-rk"><div class="sc-rk-label">Extra anual estimado</div><div class="sc-rk-val" id="sc-gain-anual" style="color:var(--accent)">—</div></div>
+        </div>
+        <div style="margin-bottom:8px;font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em">Recomendación de uso de los fondos extra</div>
+        <div id="sc-gain-alloc" class="sc-alloc"></div>
+        <div class="sc-rec-list" id="sc-gain-recs"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MATRIZ DE DECISIONES -->
+  <div class="sc-card" style="margin-bottom:20px">
+    <div class="sc-card-title">⚡ Matriz de Decisiones Financieras — Estado Actual</div>
+    <div class="sc-matrix" id="sc-decision-matrix"></div>
+  </div>
+</div>
+
 </div><!-- end content-area -->
 </div><!-- end main-wrapper -->
 </body>
