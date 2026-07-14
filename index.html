@@ -515,109 +515,131 @@
   ═══════════════════════════════════════════════════ */
   @media (max-width: 768px) {
 
-    /* ── Header compacto ── */
-    .header { padding: 0 14px; height: 52px; }
-    .logo-text { font-size: 15px; }
+    /* ── Header ── */
+    .header { padding: 0 12px; height: 50px; }
+    .logo-icon { width: 28px; height: 28px; font-size: 13px; border-radius: 7px; }
+    .logo-text { font-size: 14px; }
     .logo-sub { display: none; }
-    .logo-icon { width: 30px; height: 30px; font-size: 14px; }
-    .header-badge { font-size: 10px; padding: 4px 8px; }
+    .header-badge { font-size: 10px; padding: 3px 8px; }
     #hdr-last-mod { display: none; }
 
-    /* ── Period filter scrollable ── */
-    .period-bar { padding: 7px 10px; gap: 5px; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    /* ── Period bar: fija, sin salto de línea ── */
+    .period-bar {
+      padding: 6px 10px; gap: 5px;
+      flex-wrap: nowrap; overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none; height: 40px;
+      align-items: center;
+    }
     .period-bar::-webkit-scrollbar { display: none; }
-    .period-label { display: none; }
-    .period-sep { display: none; }
-    .period-btn { font-size: 11px; padding: 4px 10px; white-space: nowrap; flex-shrink: 0; }
+    .period-label, .period-sep { display: none; }
+    .period-btn { font-size: 11px; padding: 3px 10px; white-space: nowrap; flex-shrink: 0; }
 
-    /* ── Layout: sidebar va abajo como bottom nav ── */
-    .main-wrapper { flex-direction: column; height: calc(100vh - 96px); }
+    /* ── Layout principal: nav queda abajo ── */
+    .main-wrapper {
+      flex-direction: column;
+      height: calc(calc(var(--vh, 1vh) * 100) - 90px);
+      height: calc(100dvh - 90px);
+      overflow: hidden;
+    }
+    .content-area { order: 1; flex: 1 1 0; overflow-y: auto; overflow-x: hidden; min-height: 0; }
+
+    /* ── Sidebar → bottom tab bar ── */
     .sidebar {
-      width: 100%; min-width: unset;
-      border-right: none;
-      border-top: 1px solid var(--border);
-      flex-direction: row;
-      padding: 0;
-      overflow-x: auto;
-      overflow-y: hidden;
-      order: 2;
-      flex-shrink: 0;
-      height: 58px;
+      order: 2; flex-shrink: 0;
+      width: 100%; min-width: unset; height: 54px;
+      flex-direction: row; padding: 0;
+      border-right: none; border-top: 1px solid var(--border);
+      overflow-x: auto; overflow-y: hidden;
+      scrollbar-width: none;
     }
     .sidebar::-webkit-scrollbar { display: none; }
     .sidebar-brand { display: none; }
     .nav-tab {
-      flex-direction: column;
-      border-left: none;
-      border-top: 3px solid transparent;
-      padding: 7px 10px 5px;
-      font-size: 9.5px;
-      gap: 3px;
-      align-items: center;
-      white-space: nowrap;
-      flex-shrink: 0;
-      min-width: 68px;
+      flex-direction: column; align-items: center;
+      justify-content: center;
+      border-left: none; border-top: 3px solid transparent;
+      padding: 5px 8px 4px; gap: 2px;
+      font-size: 9px; white-space: nowrap;
+      flex-shrink: 0; min-width: 64px;
     }
-    .nav-tab.active { border-top-color: var(--accent); border-left-color: transparent; }
-    .nav-tab .tab-icon { font-size: 16px; }
-    .content-area { order: 1; flex: 1; overflow-y: auto; }
+    .nav-tab.active { border-top-color: var(--accent); border-left-color: transparent; background: rgba(99,102,241,.07); }
+    .nav-tab .tab-icon { font-size: 15px; }
 
-    /* ── Dashboard padding ── */
-    .dashboard { padding: 14px 12px; }
+    /* ── Dashboard panels ── */
+    .dashboard { padding: 12px 10px; }
 
-    /* ── Directorio KPIs ── */
-    .dir-kpi-row { grid-template-columns: 1fr 1fr; gap: 8px; }
-    .dir-mid-row { grid-template-columns: 1fr; }
-    .dir-prog-kpis { grid-template-columns: 1fr 1fr; }
-    .dir-charts-row { grid-template-columns: 1fr; }
-    .dir-cf-kpis { grid-template-columns: 1fr 1fr; gap: 7px; }
-    .dir-kpi-val { font-size: 1.3rem !important; }
-
-    /* ── Grids generales ── */
-    .kpi-grid { grid-template-columns: 1fr 1fr !important; gap: 10px; }
-    .grid-2, .grid-3, .grid-1-2, .grid-2-1 { grid-template-columns: 1fr; }
-
-    /* ── Cartola ── */
-    .cartola-row { flex-direction: column; }
-    #dash4 .cfo-chart-grid-2, #dash4 .cfo-chart-grid-3 { grid-template-columns: 1fr; }
-    #dash4 .calc-grid { grid-template-columns: 1fr; }
-    #dash4 .sim-reserva-grid { grid-template-columns: 1fr; }
-    #dash4 .reserva-methods-grid { grid-template-columns: 1fr 1fr; }
-    #dash4 .sim-kpi-row { grid-template-columns: 1fr 1fr; }
-    .sc-grid2 { grid-template-columns: 1fr; }
-    .sc-base-kpis { grid-template-columns: 1fr 1fr; }
-    .sc-result-kpis { grid-template-columns: 1fr 1fr; }
-    .sc-matrix { grid-template-columns: 1fr; }
-    .h2f-month-totals { grid-template-columns: repeat(3,1fr); }
-    #dash4 .cfo-kpi-grid { grid-template-columns: repeat(2, 1fr) !important; }
-
-    /* ── Cartola import ── */
-    [style*="grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px"] { display: block !important; }
-
-    /* ── Cards & Typography ── */
-    .kpi-card { padding: 14px; }
-    .card { padding: 14px 12px; }
-    .section-title { font-size: 16px !important; }
+    /* ── Cards ── */
+    .kpi-card { padding: 12px 10px; border-radius: 10px; }
+    .card { padding: 12px 10px; border-radius: 10px; }
+    .kpi-val { font-size: 1.4rem !important; }
+    .section-title { font-size: 15px !important; }
     .section-sub { font-size: 11px; }
 
-    /* ── Tables ── */
-    .table-wrap, #dash4 .cfo-tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-    table { font-size: 11px; }
-    th, td { padding: 6px 7px !important; }
+    /* ── Directorio ── */
+    .dir-kpi-row { grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+    .dir-kpi-val { font-size: 1.1rem !important; }
+    .dir-kpi-card { padding: 10px !important; }
+    .dir-mid-row { grid-template-columns: 1fr; gap: 10px; }
+    .dir-prog-kpis { grid-template-columns: 1fr 1fr 1fr; gap: 5px; }
+    .dir-charts-row { grid-template-columns: 1fr; gap: 10px; }
+    .dir-cf-kpis { grid-template-columns: 1fr 1fr; gap: 7px; }
 
-    /* ── Charts — reducir altura en móvil ── */
-    canvas { max-height: 220px !important; }
+    /* ── Grids genéricos ── */
+    .kpi-grid { grid-template-columns: 1fr 1fr !important; gap: 8px; }
+    .grid-2, .grid-3, .grid-1-2, .grid-2-1 { grid-template-columns: 1fr !important; gap: 10px; }
+
+    /* ── CFO / Dash4 ── */
+    #dash4 .cfo-kpi-grid { grid-template-columns: repeat(2,1fr) !important; gap: 8px; }
+    #dash4 .cfo-chart-grid-2, #dash4 .cfo-chart-grid-3 { grid-template-columns: 1fr !important; }
+    #dash4 .calc-grid { grid-template-columns: 1fr !important; }
+    #dash4 .sim-reserva-grid { grid-template-columns: 1fr !important; }
+    #dash4 .reserva-methods-grid { grid-template-columns: 1fr 1fr !important; }
+    #dash4 .sim-kpi-row { grid-template-columns: 1fr 1fr !important; }
+
+    /* ── Escenarios ── */
+    .sc-grid2 { grid-template-columns: 1fr !important; }
+    .sc-base-kpis { grid-template-columns: 1fr 1fr !important; }
+    .sc-result-kpis { grid-template-columns: 1fr 1fr !important; }
+    .sc-matrix { grid-template-columns: 1fr !important; }
+
+    /* ── H2 Proyecciones ── */
+    .h2f-month-totals { grid-template-columns: repeat(3,1fr) !important; gap: 5px; }
+
+    /* ── Cartola import ── */
+    #cartola-import-grid { display: block !important; }
+    #cartola-import-grid > div { margin-bottom: 12px; }
+    .cartola-row { flex-direction: column; }
+    .cartola-stat { min-width: unset; }
+
+    /* ── Tablas: scroll horizontal ── */
+    .table-wrap, #dash4 .cfo-tbl-wrap, [style*="overflow-x:auto"] { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+    table { font-size: 11px; min-width: max-content; }
+    th, td { padding: 6px 8px !important; white-space: nowrap; }
+
+    /* ── Charts ── */
+    canvas { max-height: 200px !important; }
 
     /* ── Login overlay ── */
     #login-overlay > div {
-      padding: 28px 20px !important;
-      width: 92vw !important;
-      max-width: 340px !important;
+      padding: 24px 18px !important;
+      width: 94vw !important;
+      max-width: 360px !important;
+      border-radius: 14px !important;
     }
   }
 
-  @media (max-width: 420px) {
-    .dir-kpi-row { grid-template-columns: 1fr; }
+  /* ── Pantallas muy pequeñas (<400px) ── */
+  @media (max-width: 400px) {
+    .dir-kpi-row { grid-template-columns: 1fr !important; }
+    .kpi-grid { grid-template-columns: 1fr !important; }
+    .dir-cf-kpis { grid-template-columns: 1fr !important; }
+    .sc-base-kpis { grid-template-columns: 1fr !important; }
+    .sc-result-kpis { grid-template-columns: 1fr !important; }
+    .nav-tab { min-width: 56px; font-size: 8px; }
+    .nav-tab .tab-icon { font-size: 13px; }
+    .dashboard { padding: 10px 8px; }
+  }
     .kpi-grid { grid-template-columns: 1fr !important; }
     .sc-base-kpis { grid-template-columns: 1fr; }
     .sc-result-kpis { grid-template-columns: 1fr; }
@@ -4980,5 +5002,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </div><!-- end content-area -->
 </div><!-- end main-wrapper -->
+<script>
+// iOS Safari 100vh fix — recalculate on resize/orientationchange
+function fixMobileHeight() {
+  if (window.innerWidth <= 768) {
+    var vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', vh + 'px');
+  }
+}
+fixMobileHeight();
+window.addEventListener('resize', fixMobileHeight);
+window.addEventListener('orientationchange', function(){ setTimeout(fixMobileHeight, 200); });
+</script>
 </body>
 </html>
