@@ -3886,8 +3886,7 @@ function cartolaDetectCols(headers) {
 
 function cartolaParseCSV(text) {
   // Try semicolon first, then comma
-  const lines = text.split(/?
-/).filter(l => l.trim() !== '');
+  const lines = text.replace(String.fromCharCode(13),'').split(String.fromCharCode(10)).filter(l => l.trim() !== '');
   if (lines.length < 2) return null;
   
   let delim = ';';
