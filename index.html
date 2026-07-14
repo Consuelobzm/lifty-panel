@@ -3886,7 +3886,8 @@ function cartolaDetectCols(headers) {
         h.includes('salida') || h.includes('debe') || h === '-') && !h.includes('/')) outIdx=i;
     if (h.includes('fecha') || h.includes('date') || h.includes('fch')) dateIdx=i;
     if (h.includes('descrip') || h.includes('detalle') || h.includes('glosa') ||
-        h.includes('concepto') || h.includes('movimiento') || h.includes('operacion')) descIdx=i;
+        h.includes('concepto') || h.includes('operacion')) descIdx=i;
+    if ((h.includes('movimiento') || h.includes('descripcion')) && !h.startsWith('n')) { if (descIdx < 0) descIdx=i; }
   });
   if (montoIdx >= 0) { inIdx = -1; outIdx = -1; }
   return { inIdx, outIdx, dateIdx, descIdx, montoIdx, typeIdx };
@@ -3991,9 +3992,7 @@ function cartolaHandleFile(input) {
         cartolaSomething('⚠️ No se detectaron columnas. Verifica que el archivo tenga columnas llamadas Cargo/Abono, Débito/Crédito o similares.');
         return;
       }
-      // Pass rows as semicolon-joined strings for uniform parsing
-      const excelRows = data.slice(headerRow+1).map(function(row){ return row.map(function(c){ return c===null||c===undefined?'':String(c); }).join('\t'); });
-      const r = cartolaParseRows(excelRows, '\t', foundCols);
+      const r = cartolaParseRowsXLSX(data.slice(headerRow+1), foundCols);
       _cartolaData = { ...r, mesIdx };
       cartolaShowPreview(file.name);
     };
@@ -4001,6 +4000,40 @@ function cartolaHandleFile(input) {
   } else {
     cartolaSomething('⚠️ Formato no soportado. Usa CSV o XLSX.');
   }
+}
+
+function cartolaParseRowsXLSX(dataRows, cols) {
+  // Handles actual Excel cell arrays (avoids string/delimiter conversion issues)
+  let totalIn = 0, totalOut = 0;
+  const rows = [];
+  dataRows.forEach(function(rowArr) {
+    if (!rowArr) return;
+    var allEmpty = rowArr.every(function(c){ return c === null || c === undefined || String(c).trim() === ''; });
+    if (allEmpty) return;
+    var getCell = function(idx){ return idx >= 0 ? String(rowArr[idx] !== null && rowArr[idx] !== undefined ? rowArr[idx] : '') : ''; };
+    var date = getCell(cols.dateIdx).trim();
+    var desc = getCell(cols.descIdx).trim().substring(0,50);
+    var inVal = 0, outVal = 0;
+    if (cols.montoIdx >= 0) {
+      var montoRaw = rowArr[cols.montoIdx];
+      var monto = (typeof montoRaw === 'number') ? montoRaw : cartolaParseNum(String(montoRaw || 0));
+      var tipo = getCell(cols.typeIdx).trim().toUpperCase();
+      if (tipo === 'A') { inVal = Math.abs(monto); }
+      else if (tipo === 'C') { outVal = Math.abs(monto); }
+      else if (monto > 0) { inVal = monto; }
+      else if (monto < 0) { outVal = Math.abs(monto); }
+    } else {
+      var inRaw = cols.inIdx >= 0 ? rowArr[cols.inIdx] : null;
+      var outRaw = cols.outIdx >= 0 ? rowArr[cols.outIdx] : null;
+      inVal  = (typeof inRaw === 'number') ? Math.abs(inRaw) : cartolaParseNum(String(inRaw || 0));
+      outVal = (typeof outRaw === 'number') ? Math.abs(outRaw) : cartolaParseNum(String(outRaw || 0));
+    }
+    if (inVal > 0 || outVal > 0) {
+      totalIn += inVal; totalOut += outVal;
+      rows.push({ date: date, desc: desc, inVal: inVal, outVal: outVal });
+    }
+  });
+  return { inflows: totalIn, outflows: totalOut, rows: rows };
 }
 
 function cartolaSomething(msg) {
