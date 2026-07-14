@@ -4062,7 +4062,7 @@ function cartolaSomething(msg) {
 
 function cartolaShowPreview(fname) {
   if (!_cartolaData) return;
-  const { inflows, outflows, rows, mesIdx } = _cartolaData;
+  const { inflows, outflows, rows, mesIdx, closingSaldo } = _cartolaData;
   const MESES_NM = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Sep.','Octubre','Nov.','Dic.'];
   const prev = document.getElementById('cartola-preview');
   prev.style.display = 'block';
@@ -4083,6 +4083,7 @@ function cartolaShowPreview(fname) {
     '<div class="cartola-stat"><div class="cartola-stat-lbl">💚 Total Ingresos</div><div class="cartola-stat-val" style="color:var(--accent3)">' + fmtFull(Math.round(inflows)) + '</div></div>' +
     '<div class="cartola-stat"><div class="cartola-stat-lbl">🔴 Total Egresos</div><div class="cartola-stat-val" style="color:var(--accent5)">' + fmtFull(Math.round(outflows)) + '</div></div>' +
     '<div class="cartola-stat"><div class="cartola-stat-lbl">⚖️ Flujo Neto</div><div class="cartola-stat-val" style="color:' + (inflows>=outflows?'var(--accent3)':'var(--accent5)') + '">' + fmtFull(Math.round(inflows-outflows)) + '</div></div>' +
+    (closingSaldo !== null && closingSaldo > 0 ? '<div class="cartola-stat" style="border:1px solid var(--accent2)"><div class="cartola-stat-lbl" style="color:var(--accent2)">🏦 Saldo Actual Cuenta</div><div class="cartola-stat-val" style="color:var(--accent2)">' + fmtFull(Math.round(closingSaldo)) + '</div></div>' : '') +
     '</div>' +
     (rows.length > 0 ? '<div class="cartola-trx-list"><table><thead><tr><th style="text-align:left;padding:4px 8px;color:var(--text-muted)">Fecha</th><th style="text-align:left;padding:4px 8px;color:var(--text-muted)">Descripción</th><th style="text-align:right;padding:4px 8px;color:var(--accent3)">Ingreso</th><th style="text-align:right;padding:4px 8px;color:var(--accent5)">Egreso</th></tr></thead><tbody>' + recentRows + '</tbody></table>' + (rows.length > 8 ? '<div style="text-align:center;color:var(--text-muted);font-size:.7rem;padding:6px">... y ' + (rows.length-8) + ' transacciones más</div>' : '') + '</div>' : '') +
     '<button class="cartola-apply-btn" onclick="cartolaApply()">✅ Aplicar al Dashboard — ' + MESES_NM[mesIdx] + ' 2026</button>' +
@@ -4091,7 +4092,7 @@ function cartolaShowPreview(fname) {
 
 function cartolaApply() {
   if (!_cartolaData) return;
-  const { inflows, outflows, mesIdx } = _cartolaData;
+  const { inflows, outflows, mesIdx, closingSaldo } = _cartolaData;
   const MESES_NM = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Sep.','Octubre','Nov.','Dic.'];
   
   // Actualizar EER12 (flujo de caja) para el mes correspondiente
