@@ -3996,7 +3996,7 @@ function cartolaHandleFile(input) {
         return;
       }
       const r = cartolaParseRowsXLSX(data.slice(headerRow + 1), foundCols);
-      _cartolaData = { ...r, mesIdx };
+      _cartolaData = { ...r, mesIdx, saldoAnterior: dirCajaAct };
       cartolaShowPreview(file.name);
     };
     reader.readAsArrayBuffer(file);
@@ -4062,11 +4062,13 @@ function cartolaSomething(msg) {
 
 function cartolaShowPreview(fname) {
   if (!_cartolaData) return;
-  const { inflows, outflows, rows, mesIdx, closingSaldo } = _cartolaData;
+  const { inflows, outflows, rows, mesIdx, saldoAnterior } = _cartolaData;
+  const flujoNeto = Math.round(inflows - outflows);
+  const saldoActual = Math.round((saldoAnterior || 0) + flujoNeto);
   const MESES_NM = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Sep.','Octubre','Nov.','Dic.'];
   const prev = document.getElementById('cartola-preview');
   prev.style.display = 'block';
-  
+
   const recentRows = rows.slice(0, 8).map(r =>
     '<tr>' +
     '<td style="color:var(--text-muted)">' + (r.date||'—') + '</td>' +
@@ -4075,16 +4077,27 @@ function cartolaShowPreview(fname) {
     '<td style="color:var(--accent5);text-align:right">' + (r.outVal>0 ? fmtFull(r.outVal) : '') + '</td>' +
     '</tr>'
   ).join('');
-  
+
   prev.innerHTML =
     '<div class="cartola-preview">' +
-    '<div style="font-size:.72rem;color:var(--text-muted);margin-bottom:10px">📄 <b>' + fname + '</b> · ' + rows.length + ' transacciones detectadas · Mes: <b style="color:var(--accent)">' + MESES_NM[mesIdx] + ' 2026</b></div>' +
-    '<div class="cartola-row">' +
+    '<div style="font-size:.72rem;color:var(--text-muted);margin-bottom:10px">📄 <b>' + fname + '</b> · ' + rows.length + ' transacciones · Mes: <b style="color:var(--accent)">' + MESES_NM[mesIdx] + ' 2026</b></div>' +
+
+    // Fila 1: flujos del período
+    '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px">' +
     '<div class="cartola-stat"><div class="cartola-stat-lbl">💚 Total Ingresos</div><div class="cartola-stat-val" style="color:var(--accent3)">' + fmtFull(Math.round(inflows)) + '</div></div>' +
     '<div class="cartola-stat"><div class="cartola-stat-lbl">🔴 Total Egresos</div><div class="cartola-stat-val" style="color:var(--accent5)">' + fmtFull(Math.round(outflows)) + '</div></div>' +
-    '<div class="cartola-stat"><div class="cartola-stat-lbl">⚖️ Flujo Neto</div><div class="cartola-stat-val" style="color:' + (inflows>=outflows?'var(--accent3)':'var(--accent5)') + '">' + fmtFull(Math.round(inflows-outflows)) + '</div></div>' +
-    '<div class="cartola-stat" style="border:1px solid var(--accent2)"><div class="cartola-stat-lbl" style="color:var(--accent2)">🏦 Saldo Resultante</div><div class="cartola-stat-val" style="color:var(--accent2)">' + fmtFull(Math.round(dirCajaAct + inflows - outflows)) + '</div></div>' +
+    '<div class="cartola-stat"><div class="cartola-stat-lbl">⚖️ Flujo Neto</div><div class="cartola-stat-val" style="color:' + (flujoNeto>=0?'var(--accent3)':'var(--accent5)') + '">' + (flujoNeto>=0?'+':'') + fmtFull(flujoNeto) + '</div></div>' +
     '</div>' +
+
+    // Fila 2: cálculo del saldo resultante
+    '<div style="display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:6px;align-items:center;background:var(--surface);border-radius:10px;padding:12px 16px;margin-bottom:12px;font-variant-numeric:tabular-nums">' +
+    '<div><div style="font-size:.62rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Saldo Anterior</div><div style="font-size:1rem;font-weight:700;color:var(--text)">' + fmtFull(saldoAnterior||0) + '</div></div>' +
+    '<div style="font-size:1.4rem;color:var(--text-muted);font-weight:300">' + (flujoNeto>=0?'+':'−') + '</div>' +
+    '<div><div style="font-size:.62rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Flujo Neto</div><div style="font-size:1rem;font-weight:700;color:' + (flujoNeto>=0?'var(--accent3)':'var(--accent5)') + '">' + fmtFull(Math.abs(flujoNeto)) + '</div></div>' +
+    '<div style="font-size:1.4rem;color:var(--text-muted);font-weight:300">=</div>' +
+    '<div style="border-left:2px solid var(--accent2);padding-left:12px"><div style="font-size:.62rem;color:var(--accent2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">🏦 Saldo Actual</div><div style="font-size:1.1rem;font-weight:700;color:var(--accent2)">' + fmtFull(saldoActual) + '</div></div>' +
+    '</div>' +
+
     (rows.length > 0 ? '<div class="cartola-trx-list"><table><thead><tr><th style="text-align:left;padding:4px 8px;color:var(--text-muted)">Fecha</th><th style="text-align:left;padding:4px 8px;color:var(--text-muted)">Descripción</th><th style="text-align:right;padding:4px 8px;color:var(--accent3)">Ingreso</th><th style="text-align:right;padding:4px 8px;color:var(--accent5)">Egreso</th></tr></thead><tbody>' + recentRows + '</tbody></table>' + (rows.length > 8 ? '<div style="text-align:center;color:var(--text-muted);font-size:.7rem;padding:6px">... y ' + (rows.length-8) + ' transacciones más</div>' : '') + '</div>' : '') +
     '<button class="cartola-apply-btn" onclick="cartolaApply()">✅ Aplicar al Dashboard — ' + MESES_NM[mesIdx] + ' 2026</button>' +
     '</div>';
@@ -4092,7 +4105,7 @@ function cartolaShowPreview(fname) {
 
 function cartolaApply() {
   if (!_cartolaData) return;
-  const { inflows, outflows, mesIdx, closingSaldo } = _cartolaData;
+  const { inflows, outflows, mesIdx, saldoAnterior } = _cartolaData;
   const MESES_NM = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Sep.','Octubre','Nov.','Dic.'];
   
   // Actualizar EER12 (flujo de caja) para el mes correspondiente
@@ -4115,8 +4128,8 @@ function cartolaApply() {
     EER12.ingNetos[mesIdx] = Math.round(inflows);
   }
   
-  // Calcular nuevo saldo: saldo_base (mes anterior) + ingresos - egresos cartola
-  dirCajaAct = Math.round(dirCajaAct + inflows - outflows);
+  // Calcular nuevo saldo: saldo_anterior (al momento de subir cartola) + flujo neto
+  dirCajaAct = Math.round((saldoAnterior || 0) + inflows - outflows);
   dirCajaManual = true;
   var inpDir = document.getElementById('dir-caja-inp');
   if (inpDir) inpDir.value = dirCajaAct.toLocaleString('es-CL');
