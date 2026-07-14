@@ -155,6 +155,7 @@
     .dir-burn-card, .dir-progress-card, .dir-costos-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
     .dir-section-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; }
     .dir-prog-kpis { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px; margin-top: 6px; }
+    .dir-prog-kpis-5 { grid-template-columns: repeat(5,1fr); }
     .dir-prog-kpi { background: var(--surface2); border-radius: 7px; padding: 7px 9px; text-align: center; }
     .dir-prog-kpi-lbl { font-size: 9.5px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-bottom: 3px; }
     .dir-prog-kpi-val { font-size: 13px; font-weight: 700; }
@@ -511,38 +512,39 @@
     @media(max-width:900px){#dash4 .sim-reserva-grid{grid-template-columns:1fr}}
 
   /* ═══════════════════════════════════════════════════
-     MOBILE RESPONSIVE — max-width: 768px
+     MOBILE RESPONSIVE — Definitivo
   ═══════════════════════════════════════════════════ */
   @media (max-width: 768px) {
 
     /* ── Header ── */
-    .header { padding: 0 12px; height: 50px; }
+    .header { padding: 0 12px; height: 50px; flex-shrink: 0; }
     .logo-icon { width: 28px; height: 28px; font-size: 13px; border-radius: 7px; }
     .logo-text { font-size: 14px; }
     .logo-sub { display: none; }
     .header-badge { font-size: 10px; padding: 3px 8px; }
     #hdr-last-mod { display: none; }
 
-    /* ── Period bar: fija, sin salto de línea ── */
+    /* ── Period bar ── */
     .period-bar {
-      padding: 6px 10px; gap: 5px;
-      flex-wrap: nowrap; overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none; height: 40px;
-      align-items: center;
+      padding: 5px 10px; height: 40px; flex-shrink: 0;
+      flex-wrap: nowrap; overflow-x: auto; gap: 5px;
+      -webkit-overflow-scrolling: touch; scrollbar-width: none;
     }
     .period-bar::-webkit-scrollbar { display: none; }
     .period-label, .period-sep { display: none; }
     .period-btn { font-size: 11px; padding: 3px 10px; white-space: nowrap; flex-shrink: 0; }
 
-    /* ── Layout principal: nav queda abajo ── */
+    /* ── Layout: contenido arriba, nav abajo ── */
     .main-wrapper {
       flex-direction: column;
-      height: calc(calc(var(--vh, 1vh) * 100) - 90px);
+      height: calc(var(--vh, 1vh) * 100 - 90px);
       height: calc(100dvh - 90px);
       overflow: hidden;
     }
-    .content-area { order: 1; flex: 1 1 0; overflow-y: auto; overflow-x: hidden; min-height: 0; }
+    .content-area {
+      order: 1; flex: 1 1 0; min-height: 0;
+      overflow-y: auto; overflow-x: hidden;
+    }
 
     /* ── Sidebar → bottom tab bar ── */
     .sidebar {
@@ -550,14 +552,12 @@
       width: 100%; min-width: unset; height: 54px;
       flex-direction: row; padding: 0;
       border-right: none; border-top: 1px solid var(--border);
-      overflow-x: auto; overflow-y: hidden;
-      scrollbar-width: none;
+      overflow-x: auto; overflow-y: hidden; scrollbar-width: none;
     }
     .sidebar::-webkit-scrollbar { display: none; }
     .sidebar-brand { display: none; }
     .nav-tab {
-      flex-direction: column; align-items: center;
-      justify-content: center;
+      flex-direction: column; align-items: center; justify-content: center;
       border-left: none; border-top: 3px solid transparent;
       padding: 5px 8px 4px; gap: 2px;
       font-size: 9px; white-space: nowrap;
@@ -572,59 +572,107 @@
     /* ── Cards ── */
     .kpi-card { padding: 12px 10px; border-radius: 10px; }
     .card { padding: 12px 10px; border-radius: 10px; }
-    .kpi-val { font-size: 1.4rem !important; }
     .section-title { font-size: 15px !important; }
     .section-sub { font-size: 11px; }
 
-    /* ── Directorio ── */
+    /* ════════════════════════════════════
+       DIRECTORIO — Burn Rate & Runway
+    ════════════════════════════════════ */
     .dir-kpi-row { grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
-    .dir-kpi-val { font-size: 1.1rem !important; }
+    .dir-kpi-val { font-size: 1.05rem !important; }
     .dir-kpi-card { padding: 10px !important; }
-    .dir-mid-row { grid-template-columns: 1fr; gap: 10px; }
-    .dir-prog-kpis { grid-template-columns: 1fr 1fr 1fr; gap: 5px; }
-    .dir-charts-row { grid-template-columns: 1fr; gap: 10px; }
-    .dir-cf-kpis { grid-template-columns: 1fr 1fr; gap: 7px; }
 
-    /* ── Grids genéricos ── */
-    .kpi-grid { grid-template-columns: 1fr 1fr !important; gap: 8px; }
-    .grid-2, .grid-3, .grid-1-2, .grid-2-1 { grid-template-columns: 1fr !important; gap: 10px; }
+    /* Mid row: stacks burn / progreso / costos uno debajo del otro */
+    .dir-mid-row { grid-template-columns: 1fr !important; gap: 10px; }
+    .dir-burn-card, .dir-progress-card, .dir-costos-card {
+      padding: 14px !important; border-radius: 10px;
+    }
 
-    /* ── CFO / Dash4 ── */
+    /* Gauge + burn stats: horizontal en móvil para aprovechar ancho */
+    #dir-runway-gauge-wrap {
+      display: flex !important; flex-direction: row !important;
+      align-items: center; gap: 16px;
+      padding: 4px 0 !important;
+    }
+    #dir-runway-gauge-wrap svg { flex-shrink: 0; }
+    #dir-burn-stats { flex: 1; }
+    #dir-burn-stats div[style] { font-size: .68rem !important; }
+
+    /* Progreso de reserva: 5 KPIs → 2 filas */
+    .dir-prog-kpis-5 { grid-template-columns: repeat(3, 1fr) !important; gap: 5px; }
+    .dir-prog-kpis   { grid-template-columns: repeat(3, 1fr) !important; gap: 5px; }
+
+    /* Charts row */
+    .dir-charts-row { grid-template-columns: 1fr !important; gap: 10px; }
+    .dir-cf-kpis { grid-template-columns: 1fr 1fr !important; gap: 7px; }
+
+    /* ════════════════════════════════════
+       CFO dash4 — KPIs, Gauge, Charts
+    ════════════════════════════════════ */
     #dash4 .cfo-kpi-grid { grid-template-columns: repeat(2,1fr) !important; gap: 8px; }
-    #dash4 .cfo-chart-grid-2, #dash4 .cfo-chart-grid-3 { grid-template-columns: 1fr !important; }
+
+    /* Burn rate + runway en CFO: las 3 tarjetas en columna */
+    #dash4 .cfo-chart-grid-3 { grid-template-columns: 1fr !important; gap: 10px; }
+    #dash4 .cfo-chart-grid-2 { grid-template-columns: 1fr !important; gap: 10px; }
+
+    /* Gauge CFO: horizontal igual que Directorio */
+    #cfo-gauge-wrap {
+      flex-direction: row !important;
+      align-items: center !important;
+      gap: 16px !important;
+      justify-content: flex-start !important;
+    }
+
+    /* Calculadora / Sim */
     #dash4 .calc-grid { grid-template-columns: 1fr !important; }
     #dash4 .sim-reserva-grid { grid-template-columns: 1fr !important; }
     #dash4 .reserva-methods-grid { grid-template-columns: 1fr 1fr !important; }
     #dash4 .sim-kpi-row { grid-template-columns: 1fr 1fr !important; }
 
-    /* ── Escenarios ── */
+    /* ════════════════════════════════════
+       ESCENARIOS — dash5
+    ════════════════════════════════════ */
+    .sc-base-kpis { grid-template-columns: 1fr 1fr !important; gap: 8px; }
     .sc-grid2 { grid-template-columns: 1fr !important; }
-    .sc-base-kpis { grid-template-columns: 1fr 1fr !important; }
-    .sc-result-kpis { grid-template-columns: 1fr 1fr !important; }
+    .sc-result-kpis { grid-template-columns: 1fr 1fr !important; gap: 7px; }
     .sc-matrix { grid-template-columns: 1fr !important; }
 
-    /* ── H2 Proyecciones ── */
+    /* ════════════════════════════════════
+       H2 PROYECCIONES — dash3
+    ════════════════════════════════════ */
     .h2f-month-totals { grid-template-columns: repeat(3,1fr) !important; gap: 5px; }
 
-    /* ── Cartola import ── */
+    /* ════════════════════════════════════
+       GRIDS GENÉRICOS
+    ════════════════════════════════════ */
+    .kpi-grid { grid-template-columns: 1fr 1fr !important; gap: 8px; }
+    .grid-2, .grid-3, .grid-1-2, .grid-2-1 { grid-template-columns: 1fr !important; gap: 10px; }
+
+    /* ════════════════════════════════════
+       CARTOLA IMPORT
+    ════════════════════════════════════ */
     #cartola-import-grid { display: block !important; }
     #cartola-import-grid > div { margin-bottom: 12px; }
     .cartola-row { flex-direction: column; }
-    .cartola-stat { min-width: unset; }
 
-    /* ── Tablas: scroll horizontal ── */
-    .table-wrap, #dash4 .cfo-tbl-wrap, [style*="overflow-x:auto"] { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
-    table { font-size: 11px; min-width: max-content; }
+    /* ════════════════════════════════════
+       TABLAS
+    ════════════════════════════════════ */
+    .table-wrap, #dash4 .cfo-tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table { font-size: 11px; }
     th, td { padding: 6px 8px !important; white-space: nowrap; }
 
-    /* ── Charts ── */
+    /* ════════════════════════════════════
+       GRÁFICOS
+    ════════════════════════════════════ */
     canvas { max-height: 200px !important; }
 
-    /* ── Login overlay ── */
+    /* ════════════════════════════════════
+       LOGIN OVERLAY
+    ════════════════════════════════════ */
     #login-overlay > div {
       padding: 24px 18px !important;
-      width: 94vw !important;
-      max-width: 360px !important;
+      width: 94vw !important; max-width: 360px !important;
       border-radius: 14px !important;
     }
   }
@@ -632,6 +680,16 @@
   /* ── Pantallas muy pequeñas (<400px) ── */
   @media (max-width: 400px) {
     .dir-kpi-row { grid-template-columns: 1fr !important; }
+    .dir-prog-kpis-5, .dir-prog-kpis { grid-template-columns: 1fr 1fr !important; }
+    .kpi-grid { grid-template-columns: 1fr !important; }
+    .dir-cf-kpis { grid-template-columns: 1fr !important; }
+    .sc-base-kpis { grid-template-columns: 1fr !important; }
+    .sc-result-kpis { grid-template-columns: 1fr !important; }
+    #dash4 .cfo-kpi-grid { grid-template-columns: 1fr !important; }
+    .nav-tab { min-width: 56px; font-size: 8px; }
+    .nav-tab .tab-icon { font-size: 13px; }
+    .dashboard { padding: 10px 8px; }
+  }
     .kpi-grid { grid-template-columns: 1fr !important; }
     .dir-cf-kpis { grid-template-columns: 1fr !important; }
     .sc-base-kpis { grid-template-columns: 1fr !important; }
@@ -801,7 +859,7 @@
         <span id="dir-prog-pct" style="font-weight:800;font-size:.72rem;color:var(--accent)">0.0%</span>
         <span style="color:var(--accent2)">Ópt: <b id="dir-prog-meta">—</b></span>
       </div>
-      <div class="dir-prog-kpis" style="grid-template-columns:repeat(5,1fr)">
+      <div class="dir-prog-kpis dir-prog-kpis-5">
         <div class="dir-prog-kpi">
           <div class="dir-prog-kpi-lbl">Acumulado</div>
           <div class="dir-prog-kpi-val" id="dir-ahorro-val" style="color:var(--accent3)">—</div>
