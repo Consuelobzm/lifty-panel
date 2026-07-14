@@ -3873,15 +3873,23 @@ function cartolaParseNum(s) {
 
 function cartolaDetectCols(headers) {
   const norm = headers.map(h => String(h).trim().toLowerCase()
-    .normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/"/g,''));
-  let inIdx=-1, outIdx=-1, dateIdx=-1, descIdx=-1;
+    .replace(/á/g,'a').replace(/é/g,'e').replace(/í/g,'i')
+    .replace(/ó/g,'o').replace(/ú/g,'u').replace(/ñ/g,'n')
+    .replace(/["\']/g,'').trim());
+  let inIdx=-1, outIdx=-1, dateIdx=-1, descIdx=-1, montoIdx=-1, typeIdx=-1;
   norm.forEach((h,i) => {
-    if (h.includes('abono') || h.includes('credito') || h.includes('ingreso') || h.includes('cargo positivo')) inIdx=i;
-    if (h.includes('cargo') || h.includes('debito') || h.includes('egreso') || h.includes('cargo negativo')) outIdx=i;
-    if (h.includes('fecha') || h.includes('date')) dateIdx=i;
-    if (h.includes('descrip') || h.includes('detalle') || h.includes('glosa') || h.includes('concepto')) descIdx=i;
+    if (h === 'monto' || h === 'importe' || h === 'valor' || h === 'monto ($)' || h === 'monto clp') montoIdx=i;
+    if (h === 'cargo/abono' || h === 'tipo' || h === 'indicador' || h === 'c/a' || h === 'tipo mov' || h === 'tipo movimiento') typeIdx=i;
+    if ((h === 'abono' || h === 'abonos' || h.includes('credito') || h.includes('ingreso') ||
+        h.includes('entrada') || h.includes('deposito') || h.includes('haber') || h === '+') && !h.includes('/')) inIdx=i;
+    if ((h === 'cargo' || h === 'cargos' || h.includes('debito') || h.includes('egreso') ||
+        h.includes('salida') || h.includes('debe') || h === '-') && !h.includes('/')) outIdx=i;
+    if (h.includes('fecha') || h.includes('date') || h.includes('fch')) dateIdx=i;
+    if (h.includes('descrip') || h.includes('detalle') || h.includes('glosa') ||
+        h.includes('concepto') || h.includes('movimiento') || h.includes('operacion')) descIdx=i;
   });
-  return { inIdx, outIdx, dateIdx, descIdx };
+  if (montoIdx >= 0) { inIdx = -1; outIdx = -1; }
+  return { inIdx, outIdx, dateIdx, descIdx, montoIdx, typeIdx };
 }
 
 function cartolaParseCSV(text) {
@@ -3893,33 +3901,38 @@ function cartolaParseCSV(text) {
   const firstLine = lines[0];
   if ((firstLine.match(/;/g)||[]).length < (firstLine.match(/,/g)||[]).length) delim = ',';
   
-  const headers = lines[0].split(delim);
-  const cols = cartolaDetectCols(headers);
-  if (cols.inIdx < 0 && cols.outIdx < 0) {
-    // Try second line as header (some banks have a title row first)
-    const headers2 = lines[1].split(delim);
-    const cols2 = cartolaDetectCols(headers2);
-    if (cols2.inIdx >= 0 || cols2.outIdx >= 0) {
-      return cartolaParseRows(lines.slice(2), delim, cols2);
-    }
-    return null;
+  // Try rows 0-14 as header
+  let csvHeaderRow = -1, csvCols = null;
+  for (let ri = 0; ri < Math.min(15, lines.length); ri++) {
+    const tryCols = cartolaDetectCols(lines[ri].split(delim));
+    if (tryCols.inIdx >= 0 || tryCols.outIdx >= 0) { csvHeaderRow = ri; csvCols = tryCols; break; }
   }
-  return cartolaParseRows(lines.slice(1), delim, cols);
+  if (csvHeaderRow < 0) return null;
+  return cartolaParseRows(lines.slice(csvHeaderRow+1), delim, csvCols);
 }
 
 function cartolaParseRows(dataLines, delim, cols) {
   let totalIn = 0, totalOut = 0;
   const rows = [];
-  dataLines.forEach(line => {
-    if (!line.trim()) return;
-    const cells = line.split(delim);
-    const inVal  = cols.inIdx  >= 0 ? cartolaParseNum(cells[cols.inIdx])  : 0;
-    const outVal = cols.outIdx >= 0 ? cartolaParseNum(cells[cols.outIdx]) : 0;
-    const date   = cols.dateIdx >= 0 ? (cells[cols.dateIdx]||'').trim().replace(/"/g,'') : '';
-    const desc   = cols.descIdx >= 0 ? (cells[cols.descIdx]||'').trim().replace(/"/g,'').substring(0,45) : '';
+  dataLines.forEach(function(line) {
+    if (!line || !String(line).trim()) return;
+    const cells = String(line).split(delim);
+    const date = cols.dateIdx >= 0 ? String(cells[cols.dateIdx]||'').trim().replace(/"/g,'') : '';
+    const desc = cols.descIdx >= 0 ? String(cells[cols.descIdx]||'').trim().replace(/"/g,'').substring(0,50) : '';
+    let inVal = 0, outVal = 0;
+    if (cols.montoIdx >= 0) {
+      const monto = cartolaParseNum(cells[cols.montoIdx]);
+      const tipo = cols.typeIdx >= 0 ? String(cells[cols.typeIdx]||'').trim().toUpperCase() : '';
+      if (tipo === 'A') { inVal = Math.abs(monto); }
+      else if (tipo === 'C') { outVal = Math.abs(monto); }
+      else if (monto > 0) { inVal = monto; }
+      else if (monto < 0) { outVal = Math.abs(monto); }
+    } else {
+      inVal  = cols.inIdx  >= 0 ? cartolaParseNum(cells[cols.inIdx])  : 0;
+      outVal = cols.outIdx >= 0 ? cartolaParseNum(cells[cols.outIdx]) : 0;
+    }
     if (inVal > 0 || outVal > 0) {
-      totalIn  += inVal;
-      totalOut += outVal;
+      totalIn += inVal; totalOut += outVal;
       rows.push({ date, desc, inVal, outVal });
     }
   });
@@ -3968,21 +3981,19 @@ function cartolaHandleFile(input) {
       const ws = wb.Sheets[wb.SheetNames[0]];
       const data = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
       if (data.length < 2) { cartolaSomething('⚠️ Archivo vacío o sin datos.'); return; }
-      const headers = data[0];
-      const cols = cartolaDetectCols(headers.map(String));
-      if (cols.inIdx < 0 && cols.outIdx < 0) {
-        const cols2 = cartolaDetectCols(data[1].map(String));
-        if (cols2.inIdx >= 0 || cols2.outIdx >= 0) {
-          const r = cartolaParseRows(data.slice(2).map(row => row.join(';')), ';',
-            { inIdx: cols2.inIdx, outIdx: cols2.outIdx, dateIdx: cols2.dateIdx, descIdx: cols2.descIdx });
-          _cartolaData = { ...r, mesIdx };
-          cartolaShowPreview(file.name);
-          return;
-        }
-        cartolaSomething('⚠️ No se detectaron columnas de cargo/abono en el Excel.');
+      // Try rows 0-14 as header (banks have many title rows before data)
+      let headerRow = -1, foundCols = null;
+      for (let ri = 0; ri < Math.min(15, data.length); ri++) {
+        const tryCols = cartolaDetectCols((data[ri] || []).map(String));
+        if (tryCols.inIdx >= 0 || tryCols.outIdx >= 0) { headerRow = ri; foundCols = tryCols; break; }
+      }
+      if (headerRow < 0 || !foundCols) {
+        cartolaSomething('⚠️ No se detectaron columnas. Verifica que el archivo tenga columnas llamadas Cargo/Abono, Débito/Crédito o similares.');
         return;
       }
-      const r = cartolaParseRows(data.slice(1).map(row => row.join(';')), ';', cols);
+      // Pass rows as semicolon-joined strings for uniform parsing
+      const excelRows = data.slice(headerRow+1).map(function(row){ return row.map(function(c){ return c===null||c===undefined?'':String(c); }).join('\t'); });
+      const r = cartolaParseRows(excelRows, '\t', foundCols);
       _cartolaData = { ...r, mesIdx };
       cartolaShowPreview(file.name);
     };
