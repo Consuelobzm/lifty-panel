@@ -520,7 +520,7 @@
   </div>
   <div class="header-badge">
     Panel Financiero <span>2026</span> · Consuelo Bizama, Gerencia de Finanzas
-    &nbsp;|&nbsp; <span id="hdr-period">H1 Real</span>
+    &nbsp;|&nbsp; <span id="hdr-period">H1 Real</span>&nbsp;<span id="hdr-last-mod" style="font-size:.72rem;color:var(--text-muted);font-weight:400"></span>
   </div>
 </header>
 
@@ -1535,6 +1535,7 @@ function setPeriod(p) {
   document.getElementById('hdr-period').textContent = lbl;
   // Rebuild D1 & D2 (only built dashboards)
   rebuildAll();
+  saveState();
 }
 
 function getSlice(arr) {
@@ -1812,6 +1813,97 @@ function formatOnInput(el) {
   const newPos = Math.max(0, Math.min(cursorBefore + (dotsAfter - dotsBefore), el.value.length));
   try { el.setSelectionRange(newPos, newPos); } catch(e) {}
 }
+
+// ═══════════════ PERSISTENCIA LOCAL ═══════════════
+const PANEL_KEY = 'lifty_v2';
+
+function showLastMod(iso) {
+  const el = document.getElementById('hdr-last-mod');
+  if (!el) return;
+  try {
+    const d = new Date(iso);
+    el.textContent = '· Últ. mod: ' + d.toLocaleDateString('es-CL') + ' ' + d.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
+  } catch(e) {}
+}
+
+function saveState() {
+  const srInputs = {};
+  ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'].forEach(function(m) {
+    const el = document.getElementById('sr-'+m);
+    if (el) srInputs[m] = el.value;
+  });
+  const ciBurnEl = document.getElementById('ci-burn');
+  const state = {
+    ts: new Date().toISOString(),
+    REAL_H2: REAL_H2,
+    H2_FACTURAS: H2_FACTURAS,
+    dirCajaManual: dirCajaManual,
+    dirCajaAct: dirCajaAct,
+    dirCajaLibre: dirCajaLibre,
+    srInputs: srInputs,
+    ciBurn: ciBurnEl ? ciBurnEl.value : '',
+    activePeriod: activePeriod
+  };
+  try { localStorage.setItem(PANEL_KEY, JSON.stringify(state)); showLastMod(state.ts); } catch(e) {}
+}
+
+function _propagateRealH2toEER12() {
+  for (let i = 0; i < 6; i++) {
+    const m = getMetH2(i);
+    EER12.ingNetos[i+6]=m.ing; EER12.honExt[i+6]=m.honExt; EER12.honEquipo[i+6]=m.honEq;
+    EER12.costDir[i+6]=m.costD; EER12.utilBruta[i+6]=m.ub; EER12.marketing[i+6]=m.mkt;
+    EER12.software[i+6]=m.soft; EER12.honDir[i+6]=m.honD; EER12.admin[i+6]=m.adm;
+    EER12.totalGastos[i+6]=m.tgo; EER12.ebitda[i+6]=m.eb;
+    PROY.ingNetos[i]=m.ing; PROY.honExt[i]=m.honExt; PROY.honEquipo[i]=m.honEq;
+    PROY.costDir[i]=m.costD; PROY.utilBruta[i]=m.ub; PROY.marketing[i]=m.mkt;
+    PROY.software[i]=m.soft; PROY.honDir[i]=m.honD; PROY.admin[i]=m.adm;
+    PROY.totalGastos[i]=m.tgo; PROY.ebitda[i]=m.eb;
+    CFO_SCEN.base.ing[i]=m.ing;
+    CFO_SCEN.base.egr[i]=m.tgo+m.honExt+m.honEq+m.costD;
+  }
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(PANEL_KEY);
+    if (!raw) return;
+    const state = JSON.parse(raw);
+
+    // Restore REAL_H2
+    if (state.REAL_H2) {
+      Object.keys(REAL_H2).forEach(function(k) {
+        if (state.REAL_H2[k]) {
+          REAL_H2[k] = state.REAL_H2[k].map(function(v) {
+            return (v !== null && v !== undefined) ? parseFloat(v) : null;
+          });
+        }
+      });
+      _propagateRealH2toEER12();
+    }
+
+    // Restore H2 invoices
+    if (state.H2_FACTURAS && Array.isArray(state.H2_FACTURAS)) H2_FACTURAS = state.H2_FACTURAS;
+
+    // Restore Directorio manual caja
+    if (state.dirCajaManual) {
+      dirCajaManual = true;
+      if (state.dirCajaAct) dirCajaAct = state.dirCajaAct;
+      if (state.dirCajaLibre !== undefined) dirCajaLibre = state.dirCajaLibre;
+    }
+
+    // Stash CFO inputs for when CFO dashboard is first built
+    if (state.srInputs) window._pendingSrInputs = state.srInputs;
+    if (state.ciBurn) window._pendingCiBurn = state.ciBurn;
+
+    // Restore period (triggers rebuildAll)
+    if (state.activePeriod && state.activePeriod !== activePeriod) {
+      setPeriod(state.activePeriod);
+    }
+
+    if (state.ts) showLastMod(state.ts);
+  } catch(e) { console.warn('loadState error', e); }
+}
+// ══════════════════════════════════════════════════
 const pct = (a,b) => b ? ((a/b)*100).toFixed(1)+'%' : '—';
 const varBadge = (val, ref) => {
   if (!ref) return '';
@@ -1842,6 +1934,7 @@ function checkPassword() {
   if (val === 'Finanzasl26') {
     const ov = document.getElementById('login-overlay'); ov.style.display='none'; ov.classList.add('hidden');
     err.textContent = '';
+    setTimeout(function(){loadState();}, 80);
   } else {
     input.classList.add('error');
     err.textContent = 'Contraseña incorrecta. Intenta nuevamente.';
@@ -2115,11 +2208,13 @@ function addH2Factura() {
   ['h2f-cliente','h2f-numero','h2f-femision','h2f-fvenc','h2f-neto','h2f-iva-prev','h2f-bruto-prev']
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   renderH2Facturas();
+  saveState();
 }
 
 function removeH2Factura(idx) {
   H2_FACTURAS.splice(idx, 1);
   renderH2Facturas();
+  saveState();
 }
 
 function renderH2Facturas() {
@@ -2541,6 +2636,17 @@ let chartAnualRevInst, chartAnualEBITDAInst;
 
 function initDash4() {
   buildInputTable();
+  // Restore saved REAL_H2 into input fields
+  INPUT_ROWS.forEach(function(row) {
+    for (var i = 0; i < 6; i++) {
+      var v = REAL_H2[row.key][i];
+      if (v !== null && v !== undefined) {
+        var el = document.getElementById('inp_' + row.key + '_' + i);
+        if (el) el.value = Math.round(v).toLocaleString('es-CL');
+      }
+    }
+  });
+  if (H2_FACTURAS.length > 0) renderH2Facturas();
   buildD4KPIs();
   buildSemaforo();
   buildAdvMetrics();
@@ -2595,6 +2701,7 @@ function previewInputRow(key, i) {
   for (let j = 0; j < 6; j++) tot += getEff(key, j);
   const totalCell = document.getElementById(`inp_total_${key}`);
   if (totalCell) totalCell.textContent = fmtFull(Math.round(tot));
+  saveState();
 }
 
 function applyRealData() {
@@ -2668,6 +2775,7 @@ function applyRealData() {
   }
   // Propagar a Resumen Directorio (si está construido)
   if (builtDash[0]) updateDirPeriod();
+  saveState();
 }
 
 function clearRealData() {
@@ -3624,6 +3732,7 @@ function updateSimReserva(){
   else { proyHtml='Ingresa aportes mensuales para proyectar el tiempo estimado.'; }
   $('sr-proyeccion').innerHTML=proyHtml;
   srInvestAdvice(pct, total, META_OPTIMA, burn);
+  saveState();
 }
 function srInvestAdvice(pct, total, meta, burn){
   const runwayDias=((CFO_CAJA_ACT+total)/(burn/30)).toFixed(0);
@@ -3672,6 +3781,21 @@ function initDash5() {
   cfoBuildAlerts();
   calcSavings();
   updateSimReserva();
+  // Restore saved CFO inputs
+  if (window._pendingSrInputs) {
+    ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'].forEach(function(m) {
+      var v = window._pendingSrInputs[m];
+      var el = document.getElementById('sr-'+m);
+      if (el && v) el.value = v;
+    });
+    window._pendingSrInputs = null;
+    updateSimReserva();
+  }
+  if (window._pendingCiBurn) {
+    var cibEl = document.getElementById('ci-burn');
+    if (cibEl) { cibEl.value = window._pendingCiBurn; calcSavings(); }
+    window._pendingCiBurn = null;
+  }
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -3710,6 +3834,7 @@ function updateDirCaja() {
   buildDirProgress();
   buildDirCostos();
   buildDirCashFlow();
+  saveState();
 }
 
 function buildDirKPIs() {
