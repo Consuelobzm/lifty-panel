@@ -1622,6 +1622,7 @@ function rebuildAll() {
   if (builtDash[3]) updateD3ForPeriod();
   if (builtDash[4]) updateD4ForPeriod();
   if (builtDash[5]) syncCFOToPeriod();
+  if (builtDash[6]) { sc6BuildBase(); sc6BuildClienteSelect(); sc6BuildDecisionMatrix(); }
 }
 
 // Sincroniza el período global con el Dashboard CFO
@@ -4571,16 +4572,24 @@ function sc6BuildBase() {
 function sc6BuildClienteSelect() {
   const sel = document.getElementById('sc-cliente-sel');
   if (!sel) return;
-  // Group FACTURAS by client, compute H1 monthly average
+  // Filter FACTURAS by activeMonths (mes is 1-based), group by client
+  const activeSet = new Set(activeMonths.map(m => m + 1)); // convert 0-based to 1-based
   const byClient = {};
+  const mesesActivos = {};
   FACTURAS.forEach(f => {
-    if (f.neto > 0) byClient[f.cliente] = (byClient[f.cliente] || 0) + f.neto;
+    if (f.neto > 0 && activeSet.has(f.mes)) {
+      byClient[f.cliente] = (byClient[f.cliente] || 0) + f.neto;
+      if (!mesesActivos[f.cliente]) mesesActivos[f.cliente] = new Set();
+      mesesActivos[f.cliente].add(f.mes);
+    }
   });
+  const nMeses = activeMonths.length || 1;
   const sorted = Object.entries(byClient).sort((a,b)=>b[1]-a[1]);
   sel.innerHTML = '<option value="">— Elige un cliente —</option>' +
-    sorted.map(([name, total]) =>
-      `<option value="${Math.round(total/6)}" data-name="${name.replace(/"/g,'&quot;')}">${name.substring(0,50)} — ${fmtFull(Math.round(total/6))}/mes</option>`
-    ).join('');
+    sorted.map(([name, total]) => {
+      const avg = Math.round(total / nMeses);
+      return `<option value="${avg}" data-name="${name.replace(/"/g,'&quot;')}">${name.substring(0,50)} — ${fmtFull(avg)}/mes</option>`;
+    }).join('');
 }
 
 function sc6ClienteChange() {
