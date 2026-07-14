@@ -3996,7 +3996,7 @@ function cartolaHandleFile(input) {
         return;
       }
       const r = cartolaParseRowsXLSX(data.slice(headerRow + 1), foundCols);
-      _cartolaData = { ...r, mesIdx, saldoAnterior: dirCajaAct };
+      _cartolaData = { ...r, mesIdx, saldoAnterior: (mesIdx > 0 ? (EER12.cajaFinal[mesIdx-1] || 0) : 0) };
       cartolaShowPreview(file.name);
     };
     reader.readAsArrayBuffer(file);
