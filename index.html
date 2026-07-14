@@ -512,7 +512,26 @@
     @media(max-width:900px){#dash4 .sim-reserva-grid{grid-template-columns:1fr}}
 
   /* ═══════════════════════════════════════════════════
-     MOBILE RESPONSIVE — Definitivo
+     RESPONSIVE — Laptop angosto (900–1100px)
+  ═══════════════════════════════════════════════════ */
+  @media (max-width: 1100px) and (min-width: 769px) {
+    .sidebar { width: 180px; min-width: 180px; }
+    .nav-tab { padding: 9px 14px; font-size: 12px; }
+    .sidebar-brand { padding: 10px 14px 12px; font-size: 10px; }
+    .dashboard { padding: 18px 20px; }
+    .header { padding: 0 20px; }
+    .period-bar { padding: 8px 20px; }
+    .dir-kpi-row { grid-template-columns: repeat(2,1fr); gap: 10px; }
+    .dir-charts-row { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .dir-mid-row { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .dir-prog-kpis-5 { grid-template-columns: repeat(3,1fr) !important; }
+    .grid-3 { grid-template-columns: 1fr 1fr; }
+    #dash4 .cfo-chart-grid-3 { grid-template-columns: 1fr 1fr; }
+    .sc-matrix { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* ═══════════════════════════════════════════════════
+     MOBILE RESPONSIVE — Teléfonos (≤768px)
   ═══════════════════════════════════════════════════ */
   @media (max-width: 768px) {
 
@@ -575,101 +594,63 @@
     .section-title { font-size: 15px !important; }
     .section-sub { font-size: 11px; }
 
-    /* ════════════════════════════════════
-       DIRECTORIO — Burn Rate & Runway
-    ════════════════════════════════════ */
+    /* ── Directorio ── */
     .dir-kpi-row { grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
     .dir-kpi-val { font-size: 1.05rem !important; }
     .dir-kpi-card { padding: 10px !important; }
-
-    /* Mid row: stacks burn / progreso / costos uno debajo del otro */
     .dir-mid-row { grid-template-columns: 1fr !important; gap: 10px; }
-    .dir-burn-card, .dir-progress-card, .dir-costos-card {
-      padding: 14px !important; border-radius: 10px;
-    }
+    .dir-burn-card, .dir-progress-card, .dir-costos-card { padding: 14px !important; border-radius: 10px; }
 
-    /* Gauge + burn stats: horizontal en móvil para aprovechar ancho */
+    /* Gauge + stats en fila para aprovechar ancho */
     #dir-runway-gauge-wrap {
       display: flex !important; flex-direction: row !important;
-      align-items: center; gap: 16px;
-      padding: 4px 0 !important;
+      align-items: center; gap: 16px; padding: 4px 0 !important;
     }
-    #dir-runway-gauge-wrap svg { flex-shrink: 0; }
     #dir-burn-stats { flex: 1; }
-    #dir-burn-stats div[style] { font-size: .68rem !important; }
 
-    /* Progreso de reserva: 5 KPIs → 2 filas */
-    .dir-prog-kpis-5 { grid-template-columns: repeat(3, 1fr) !important; gap: 5px; }
-    .dir-prog-kpis   { grid-template-columns: repeat(3, 1fr) !important; gap: 5px; }
-
-    /* Charts row */
+    /* Progreso: 5 KPIs → 3 cols */
+    .dir-prog-kpis-5 { grid-template-columns: repeat(3, 1fr) !important; }
+    .dir-prog-kpis   { grid-template-columns: repeat(3, 1fr) !important; }
     .dir-charts-row { grid-template-columns: 1fr !important; gap: 10px; }
     .dir-cf-kpis { grid-template-columns: 1fr 1fr !important; gap: 7px; }
 
-    /* ════════════════════════════════════
-       CFO dash4 — KPIs, Gauge, Charts
-    ════════════════════════════════════ */
+    /* ── CFO dash4 ── */
     #dash4 .cfo-kpi-grid { grid-template-columns: repeat(2,1fr) !important; gap: 8px; }
-
-    /* Burn rate + runway en CFO: las 3 tarjetas en columna */
     #dash4 .cfo-chart-grid-3 { grid-template-columns: 1fr !important; gap: 10px; }
     #dash4 .cfo-chart-grid-2 { grid-template-columns: 1fr !important; gap: 10px; }
-
-    /* Gauge CFO: horizontal igual que Directorio */
-    #cfo-gauge-wrap {
-      flex-direction: row !important;
-      align-items: center !important;
-      gap: 16px !important;
-      justify-content: flex-start !important;
-    }
-
-    /* Calculadora / Sim */
+    #cfo-gauge-wrap { flex-direction: row !important; align-items: center !important; gap: 16px !important; }
     #dash4 .calc-grid { grid-template-columns: 1fr !important; }
     #dash4 .sim-reserva-grid { grid-template-columns: 1fr !important; }
     #dash4 .reserva-methods-grid { grid-template-columns: 1fr 1fr !important; }
     #dash4 .sim-kpi-row { grid-template-columns: 1fr 1fr !important; }
 
-    /* ════════════════════════════════════
-       ESCENARIOS — dash5
-    ════════════════════════════════════ */
-    .sc-base-kpis { grid-template-columns: 1fr 1fr !important; gap: 8px; }
+    /* ── Escenarios dash5 ── */
+    .sc-base-kpis { grid-template-columns: 1fr 1fr !important; }
     .sc-grid2 { grid-template-columns: 1fr !important; }
-    .sc-result-kpis { grid-template-columns: 1fr 1fr !important; gap: 7px; }
+    .sc-result-kpis { grid-template-columns: 1fr 1fr !important; }
     .sc-matrix { grid-template-columns: 1fr !important; }
 
-    /* ════════════════════════════════════
-       H2 PROYECCIONES — dash3
-    ════════════════════════════════════ */
-    .h2f-month-totals { grid-template-columns: repeat(3,1fr) !important; gap: 5px; }
+    /* ── H2 Proyecciones ── */
+    .h2f-month-totals { grid-template-columns: repeat(3,1fr) !important; }
 
-    /* ════════════════════════════════════
-       GRIDS GENÉRICOS
-    ════════════════════════════════════ */
+    /* ── Grids genéricos ── */
     .kpi-grid { grid-template-columns: 1fr 1fr !important; gap: 8px; }
     .grid-2, .grid-3, .grid-1-2, .grid-2-1 { grid-template-columns: 1fr !important; gap: 10px; }
 
-    /* ════════════════════════════════════
-       CARTOLA IMPORT
-    ════════════════════════════════════ */
+    /* ── Cartola import ── */
     #cartola-import-grid { display: block !important; }
     #cartola-import-grid > div { margin-bottom: 12px; }
     .cartola-row { flex-direction: column; }
 
-    /* ════════════════════════════════════
-       TABLAS
-    ════════════════════════════════════ */
+    /* ── Tablas ── */
     .table-wrap, #dash4 .cfo-tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     table { font-size: 11px; }
     th, td { padding: 6px 8px !important; white-space: nowrap; }
 
-    /* ════════════════════════════════════
-       GRÁFICOS
-    ════════════════════════════════════ */
+    /* ── Gráficos ── */
     canvas { max-height: 200px !important; }
 
-    /* ════════════════════════════════════
-       LOGIN OVERLAY
-    ════════════════════════════════════ */
+    /* ── Login ── */
     #login-overlay > div {
       padding: 24px 18px !important;
       width: 94vw !important; max-width: 360px !important;
@@ -680,6 +661,16 @@
   /* ── Pantallas muy pequeñas (<400px) ── */
   @media (max-width: 400px) {
     .dir-kpi-row { grid-template-columns: 1fr !important; }
+    .dir-prog-kpis-5, .dir-prog-kpis { grid-template-columns: 1fr 1fr !important; }
+    .kpi-grid { grid-template-columns: 1fr !important; }
+    .dir-cf-kpis { grid-template-columns: 1fr !important; }
+    .sc-base-kpis { grid-template-columns: 1fr !important; }
+    .sc-result-kpis { grid-template-columns: 1fr !important; }
+    #dash4 .cfo-kpi-grid { grid-template-columns: 1fr !important; }
+    .nav-tab { min-width: 56px; font-size: 8px; }
+    .nav-tab .tab-icon { font-size: 13px; }
+    .dashboard { padding: 10px 8px; }
+  }
     .dir-prog-kpis-5, .dir-prog-kpis { grid-template-columns: 1fr 1fr !important; }
     .kpi-grid { grid-template-columns: 1fr !important; }
     .dir-cf-kpis { grid-template-columns: 1fr !important; }
