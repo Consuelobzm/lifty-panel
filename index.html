@@ -2321,6 +2321,8 @@ function syncFacturasToEjecutivo() {
     if (!byMes[m]) return;
     const h2idx = m - 6; // 0=Jul … 5=Dic
     REAL_H2.ingNetos[h2idx] = Math.round(byMes[m]);
+    // Propagar directo a EER12 sin esperar "Aplicar datos reales"
+    EER12.ingNetos[m] = Math.round(byMes[m]);
     if (typeof builtDash !== 'undefined' && builtDash[3]) {
       const el = document.getElementById('inp_ingNetos_' + h2idx);
       if (el) {
@@ -2331,8 +2333,9 @@ function syncFacturasToEjecutivo() {
     synced++;
   });
   if (synced === 0) { alert('Sin facturas para sincronizar. Agrega al menos una factura.'); return; }
-  if (typeof builtDash !== 'undefined' && !builtDash[3]) switchDash(4);
-  alert('✅ ' + synced + ' mes' + (synced > 1 ? 'es' : '') + ' sincronizado' + (synced > 1 ? 's' : '') + ' en Resumen Ejecutivo → Ingresos Netos H2.');
+  // Propagar automáticamente a todos los dashboards
+  applyRealData();
+  alert('✅ ' + synced + ' mes' + (synced > 1 ? 'es' : '') + ' sincronizado' + (synced > 1 ? 's' : '') + ' — todos los dashboards actualizados.');
 }
 
 
