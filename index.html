@@ -341,6 +341,9 @@
     .h2f-table tfoot td:first-child { color: var(--text-muted); font-weight: 700; }
     .h2f-del { background: none; border: none; color: var(--accent5); cursor: pointer; font-size: 14px; padding: 0 4px; opacity: .7; }
     .h2f-del:hover { opacity: 1; }
+    .h2f-edit { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 14px; padding: 0 4px; opacity: .7; }
+    .h2f-edit:hover { opacity: 1; }
+    .h2f-edit-mode { border-color: var(--accent) !important; background: rgba(99,102,241,.08) !important; }
     .h2f-sync-btn { background: var(--accent3); border: none; border-radius: 7px; color: #111; font-size: 12px; font-weight: 700; padding: 7px 16px; cursor: pointer; transition: opacity .15s; }
     .h2f-sync-btn:hover { opacity: .85; }
     .h2f-month-totals { display: grid; grid-template-columns: repeat(6,1fr); gap: 8px; margin-top: 14px; }
@@ -629,9 +632,14 @@
     <div class="dir-kpi-card" style="border-top-color:var(--accent4)">
       <div class="dir-kpi-label">Caja Actual</div>
       <div class="dir-kpi-val" id="dir-caja-val" style="color:var(--accent4)">—</div>
-      <div class="dir-kpi-sub">
-        <span style="font-size:10px;color:var(--text-muted)">Ingreso manual:</span>
-        <input class="dir-inp" id="dir-caja-inp" type="text" value="7.032.076" oninput="formatOnInput(this); updateDirCaja()" onblur="formatInp(this)">
+      <div id="dir-caja-var" style="font-size:10px;font-weight:700;margin:2px 0 4px;min-height:14px"></div>
+      <div class="dir-kpi-sub" style="display:flex;flex-direction:column;gap:4px">
+        <div style="display:flex;gap:6px;align-items:center">
+          <input class="dir-inp" id="dir-caja-inp" type="text" placeholder="0" style="flex:1"
+            oninput="formatOnInput(this); previewDirCaja()" onblur="formatInp(this)">
+          <button onclick="saveDirCajaMes()" style="background:var(--accent4);color:#000;border:none;border-radius:5px;padding:3px 8px;font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap" id="dir-caja-save-btn">💾</button>
+        </div>
+        <div id="dir-caja-ts" style="font-size:9px;color:var(--text-muted);line-height:1.3">Sin registrar</div>
       </div>
     </div>
     <div class="dir-kpi-card" style="border-top-color:var(--accent)">
@@ -878,6 +886,14 @@
           </tr>
         </thead>
         <tbody id="tabla-facturas"></tbody>
+        <tfoot>
+          <tr style="background:rgba(99,102,241,.06);border-top:2px solid var(--border)">
+            <td colspan="4" style="font-weight:700;color:var(--text-muted);padding:9px">TOTAL</td>
+            <td class="r" style="font-weight:800;color:var(--accent2);padding:9px" id="reg-total-neto">$0</td>
+            <td class="r" style="font-weight:700;color:var(--text-muted);padding:9px" id="reg-total-iva">$0</td>
+            <td class="r" style="font-weight:800;color:var(--accent3);padding:9px" id="reg-total-bruto">$0</td>
+          </tr>
+        </tfoot>
       </table>
     </div>
   </div>
@@ -892,16 +908,16 @@
     </div>
     <datalist id="h2f-clientes-list"></datalist>
     <!-- FORM -->
-    <div class="h2f-form-row">
+    <div class="h2f-form-row" id="h2f-form-row">
       <div class="h2f-field"><span class="h2f-label">Cliente</span>
         <input id="h2f-cliente" class="h2f-inp" style="width:160px" list="h2f-clientes-list" placeholder="Nombre cliente"></div>
       <div class="h2f-field"><span class="h2f-label">N° Factura</span>
         <input id="h2f-numero" class="h2f-inp" style="width:80px" placeholder="001"></div>
       <div class="h2f-field"><span class="h2f-label">Mes</span>
         <select id="h2f-mes" class="h2f-inp" style="width:110px">
-          <option value="6">Julio</option><option value="7">Agosto</option>
-          <option value="8">Septiembre</option><option value="9">Octubre</option>
-          <option value="10">Noviembre</option><option value="11">Diciembre</option>
+          <option value="7">Julio</option><option value="8">Agosto</option>
+          <option value="9">Septiembre</option><option value="10">Octubre</option>
+          <option value="11">Noviembre</option><option value="12">Diciembre</option>
         </select></div>
       <div class="h2f-field"><span class="h2f-label">Fecha Emisión</span>
         <input id="h2f-femision" type="date" class="h2f-inp" style="width:130px"></div>
@@ -914,7 +930,8 @@
         <input id="h2f-iva-prev" class="h2f-inp" style="width:110px;opacity:.6;cursor:default" readonly placeholder="—"></div>
       <div class="h2f-field"><span class="h2f-label">Monto Bruto</span>
         <input id="h2f-bruto-prev" class="h2f-inp" style="width:120px;opacity:.6;cursor:default" readonly placeholder="—"></div>
-      <button class="h2f-btn-add" onclick="addH2Factura()">+ Agregar</button>
+      <button id="h2f-add-btn" class="h2f-btn-add" onclick="addH2Factura()">+ Agregar</button>
+      <button id="h2f-cancel-btn" class="h2f-btn-add" onclick="cancelH2Edit()" style="display:none;background:var(--surface2);color:var(--text-muted);border:1px solid var(--border)">✕ Cancelar</button>
     </div>
     <!-- TABLE -->
     <div class="table-wrap" style="max-height:380px;overflow-y:auto">
@@ -937,12 +954,46 @@
     <div style="margin-top:16px">
       <div style="font-size:11px;color:var(--text-muted);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em">Ingresos Netos por Mes — se sincronizarán con Resumen Ejecutivo</div>
       <div class="h2f-month-totals">
-        <div class="h2f-month-chip"><div class="hmc-label">Julio</div><div class="hmc-val" id="h2f-mt-6">$0</div></div>
-        <div class="h2f-month-chip"><div class="hmc-label">Agosto</div><div class="hmc-val" id="h2f-mt-7">$0</div></div>
-        <div class="h2f-month-chip"><div class="hmc-label">Septiembre</div><div class="hmc-val" id="h2f-mt-8">$0</div></div>
-        <div class="h2f-month-chip"><div class="hmc-label">Octubre</div><div class="hmc-val" id="h2f-mt-9">$0</div></div>
-        <div class="h2f-month-chip"><div class="hmc-label">Noviembre</div><div class="hmc-val" id="h2f-mt-10">$0</div></div>
-        <div class="h2f-month-chip"><div class="hmc-label">Diciembre</div><div class="hmc-val" id="h2f-mt-11">$0</div></div>
+        <div class="h2f-month-chip"><div class="hmc-label">Julio</div><div class="hmc-val" id="h2f-mt-7">$0</div></div>
+        <div class="h2f-month-chip"><div class="hmc-label">Agosto</div><div class="hmc-val" id="h2f-mt-8">$0</div></div>
+        <div class="h2f-month-chip"><div class="hmc-label">Septiembre</div><div class="hmc-val" id="h2f-mt-9">$0</div></div>
+        <div class="h2f-month-chip"><div class="hmc-label">Octubre</div><div class="hmc-val" id="h2f-mt-10">$0</div></div>
+        <div class="h2f-month-chip"><div class="hmc-label">Noviembre</div><div class="hmc-val" id="h2f-mt-11">$0</div></div>
+        <div class="h2f-month-chip"><div class="hmc-label">Diciembre</div><div class="hmc-val" id="h2f-mt-12">$0</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CAJA AL CIERRE DEL MES -->
+  <div class="card" style="margin-top:22px">
+    <div class="card-title" style="display:flex;align-items:center;gap:10px">
+      <div class="card-title-dot" style="background:var(--accent4)"></div>
+      💳 Saldo de Caja al Cierre del Mes
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:28px;flex-wrap:wrap;padding:10px 0 4px">
+      <!-- Valor actual -->
+      <div style="min-width:160px">
+        <div style="font-size:10px;color:var(--text-muted);font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px" id="cpm-periodo-label">Mes</div>
+        <div style="font-size:2rem;font-weight:800;color:var(--accent4);line-height:1.1" id="cpm-val-display">—</div>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:5px" id="cpm-ts-display">Sin registrar</div>
+      </div>
+      <!-- Input guardar -->
+      <div style="flex:1;min-width:220px">
+        <div style="font-size:10px;color:var(--text-muted);font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px">Registrar saldo bancario ($)</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="cpm-inp" class="h2f-inp" type="text" placeholder="0"
+            style="width:160px;font-size:.88rem"
+            oninput="formatOnInput(this)" onblur="formatInp(this)">
+          <button id="cpm-save-btn" class="h2f-btn-add" onclick="saveCajaMes()">💾 Guardar</button>
+        </div>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:7px" id="cpm-hint">Selecciona un mes individual para registrar el saldo</div>
+      </div>
+      <!-- Historial chips -->
+      <div style="flex:1;min-width:200px">
+        <div style="font-size:10px;color:var(--text-muted);font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px">Historial por Mes</div>
+        <div id="cpm-hist" style="display:flex;flex-wrap:wrap;gap:6px">
+          <span style="font-size:11px;color:var(--text-muted)">Sin registros aún</span>
+        </div>
       </div>
     </div>
   </div>
@@ -1604,12 +1655,48 @@ function labelsSlice() {
   return activeMonths.map(i => MESES_SHORT[i]);
 }
 
+function syncH2IngresosToEER12() {
+  // Sumar H2_FACTURAS por mes y actualizar EER12.ingNetos + REAL_H2 antes de renderizar dashboards
+  const byMes = {};
+  H2_FACTURAS.forEach(f => { if (f.mes >= 7 && f.neto > 0) byMes[f.mes] = (byMes[f.mes]||0) + f.neto; });
+  [7,8,9,10,11,12].forEach(mes => {
+    const h2idx  = mes - 7;  // índice 0-based REAL_H2 (0=Jul … 5=Dic)
+    const eer12i = mes - 1;  // índice 0-based EER12  (6=Jul … 11=Dic)
+    if (byMes[mes] > 0) {
+      const val = Math.round(byMes[mes]);
+      REAL_H2.ingNetos[h2idx] = val;
+      // Recalcular EER12 para este mes con los nuevos ingresos
+      const m = getMetH2(h2idx);
+      EER12.ingNetos[eer12i]    = m.ing;
+      EER12.honExt[eer12i]      = m.honExt;
+      EER12.honEquipo[eer12i]   = m.honEq;
+      EER12.costDir[eer12i]     = m.costD;
+      EER12.utilBruta[eer12i]   = m.ub;
+      EER12.marketing[eer12i]   = m.mkt;
+      EER12.software[eer12i]    = m.soft;
+      EER12.honDir[eer12i]      = m.honD;
+      EER12.admin[eer12i]       = m.adm;
+      EER12.totalGastos[eer12i] = m.tgo;
+      EER12.ebitda[eer12i]      = m.eb;
+      // Actualizar campo en D4 si está construido
+      if (builtDash[3]) {
+        const el = document.getElementById('inp_ingNetos_' + h2idx);
+        if (el) { el.value = val.toLocaleString('es-CL'); if (typeof previewInputRow === 'function') previewInputRow('ingNetos', h2idx); }
+      }
+    }
+  });
+}
+
 function rebuildAll() {
   const lbl = PERIOD_LABEL[activePeriod] || activePeriod;
+  // Al cambiar período, resetear flag manual para que cargue el valor guardado del mes
+  dirCajaManual = false;
   // Sincronizar cfoPeriod primero — lo usan tanto CFO como Resumen Directorio
   const _h1s = new Set([0,1,2,3,4,5]), _h2s = new Set([6,7,8,9,10,11]);
   cfoPeriod = (activeMonths.some(m=>_h1s.has(m)) && activeMonths.some(m=>_h2s.has(m)))
     ? 'full' : (activeMonths.some(m=>_h2s.has(m)) ? 'h2' : 'h1');
+  // Propagar H2_FACTURAS a EER12 ANTES de actualizar dashboards
+  syncH2IngresosToEER12();
   // Actualizar títulos de período en todos los dashboards
   ['d1-title-period','d2-title-period'].forEach(id => {
     const el = document.getElementById(id);
@@ -1617,7 +1704,7 @@ function rebuildAll() {
   });
   document.getElementById('hdr-period').textContent = lbl;
   if (builtDash[0]) updateDirPeriod();
-  if (builtDash[1]) applyFilters();
+  if (builtDash[1]) { applyFilters(); updateCajaMesDisplay(); }
   if (builtDash[2]) updateD2Charts();
   if (builtDash[3]) updateD3ForPeriod();
   if (builtDash[4]) updateD4ForPeriod();
@@ -1891,6 +1978,7 @@ function saveState() {
     ts: new Date().toISOString(),
     REAL_H2: REAL_H2,
     H2_FACTURAS: H2_FACTURAS,
+    CAJA_POR_MES: CAJA_POR_MES,
     dirCajaManual: dirCajaManual,
     dirCajaAct: dirCajaAct,
     dirCajaLibre: dirCajaLibre,
@@ -1918,6 +2006,8 @@ function _propagateRealH2toEER12() {
 }
 
 function loadState() {
+  // Siempre propagar H2_FACTURAS a EER12 al iniciar (con o sin localStorage)
+  syncH2IngresosToEER12();
   try {
     const raw = localStorage.getItem(PANEL_KEY);
     if (!raw) return;
@@ -1935,8 +2025,21 @@ function loadState() {
       _propagateRealH2toEER12();
     }
 
-    // Restore H2 invoices
-    if (state.H2_FACTURAS && Array.isArray(state.H2_FACTURAS)) H2_FACTURAS = state.H2_FACTURAS;
+    // Restore H2 invoices — solo sobrescribir si tiene datos (evita que localStorage vacío pise los defaults)
+    if (state.H2_FACTURAS && Array.isArray(state.H2_FACTURAS) && state.H2_FACTURAS.length > 0) {
+      H2_FACTURAS = state.H2_FACTURAS;
+      // Migración: formato antiguo usaba mes:6 para Julio (0-based), nuevo usa mes:7 (1-based)
+      if (H2_FACTURAS.some(function(f){ return f.mes === 6; })) {
+        H2_FACTURAS = H2_FACTURAS.map(function(f){ return Object.assign({}, f, {mes: f.mes + 1}); });
+      }
+    }
+    // Siempre sincronizar H2_FACTURAS → EER12 (tiene prioridad sobre REAL_H2 genérico)
+    syncH2IngresosToEER12();
+
+    // Restore saldo por mes
+    if (state.CAJA_POR_MES && typeof state.CAJA_POR_MES === 'object') {
+      Object.assign(CAJA_POR_MES, state.CAJA_POR_MES);
+    }
 
     // Restore Directorio manual caja
     if (state.dirCajaManual) {
@@ -2023,24 +2126,38 @@ let filteredFacturas = [...FACTURAS];
 
 function buildClientesSelect() {
   const sel = document.getElementById('flt-cliente');
-  const clientes = [...new Set(FACTURAS.map(f=>f.cliente))].sort();
+  // Incluir clientes de H1 y H2
+  const clientes = [...new Set([...FACTURAS, ...H2_FACTURAS].map(f=>f.cliente))].sort();
+  sel.innerHTML = '<option value="all">Todos los clientes</option>';
   clientes.forEach(c => {
     const opt = document.createElement('option');
     opt.value = c; opt.textContent = c.length > 40 ? c.substring(0,40)+'…' : c;
     sel.appendChild(opt);
   });
+  // Actualizar opciones de mes según período activo
+  const mesSel = document.getElementById('flt-mes');
+  const MESES_NOMBRES = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const activeMeses = activeMonths.map(i => i+1);
+  mesSel.innerHTML = '<option value="all">Todos los meses</option>' +
+    activeMeses.map(m => `<option value="${m}">${MESES_NOMBRES[m]}</option>`).join('');
 }
 
 function applyFilters() {
   const cli = document.getElementById('flt-cliente').value;
   const mes = document.getElementById('flt-mes').value;
-  // Determine which months to show based on activeMonths (H1 only has 1-6)
-  const h1Months = activeMonths.filter(i => i < 6).map(i => i+1);
-  filteredFacturas = FACTURAS.filter(f => {
+  // Meses activos en base al período global (1-based)
+  const activeMesSet = new Set(activeMonths.map(i => i + 1));
+  // Combinar facturas H1 y H2
+  const todasFacturas = [...FACTURAS, ...H2_FACTURAS];
+  filteredFacturas = todasFacturas.filter(f => {
     const okCli = cli === 'all' || f.cliente === cli;
-    const okMes = mes === 'all' ? (h1Months.length === 0 || h1Months.includes(f.mes)) : (f.mes === parseInt(mes));
+    const okMes = mes === 'all' ? activeMesSet.has(f.mes) : (f.mes === parseInt(mes));
     return okCli && okMes && f.neto > 0;
   });
+  // Actualizar opciones de mes y cliente según período
+  buildClientesSelect();
+  if (cli !== 'all') document.getElementById('flt-cliente').value = cli;
+  if (mes !== 'all' && activeMesSet.has(parseInt(mes))) document.getElementById('flt-mes').value = mes;
   updateDash1();
 }
 
@@ -2061,8 +2178,10 @@ function updateDash1() {
   document.getElementById('kpi-ticket').textContent = fmt(ticket);
   document.getElementById('kpi-facturas').textContent = n;
 
-  // Ingresos por mes (H1 only — all 6 months always shown in bar)
-  const porMes = [1,2,3,4,5,6].map(m => filteredFacturas.filter(f=>f.mes===m).reduce((s,f)=>s+f.neto,0));
+  // Ingresos por mes — dinámico según período activo
+  const activeMeses = activeMonths.map(i => i + 1);
+  const porMes = activeMeses.map(m => filteredFacturas.filter(f=>f.mes===m).reduce((s,f)=>s+f.neto,0));
+  chartBarMeses.data.labels = activeMeses.map(m => MESES_SHORT[m-1]);
   chartBarMeses.data.datasets[0].data = porMes;
   chartBarMeses.update('active');
 
@@ -2074,17 +2193,19 @@ function updateDash1() {
   chartDonut.data.datasets[0].data = sorted.map(([,v])=>v);
   chartDonut.update('active');
 
-  // IVA por mes
-  const ivaMes = [1,2,3,4,5,6].map(m => filteredFacturas.filter(f=>f.mes===m).reduce((s,f)=>s+f.iva,0));
+  // IVA por mes — dinámico
+  const ivaMes = activeMeses.map(m => filteredFacturas.filter(f=>f.mes===m).reduce((s,f)=>s+f.iva,0));
+  chartFacturasIVA.data.labels = activeMeses.map(m => MESES_SHORT[m-1]);
   chartFacturasIVA.data.datasets[0].data = porMes;
   chartFacturasIVA.data.datasets[1].data = ivaMes;
   chartFacturasIVA.update('active');
 
-  // Ticket promedio por mes
-  const ticketMes = [1,2,3,4,5,6].map(m => {
+  // Ticket promedio por mes — dinámico
+  const ticketMes = activeMeses.map(m => {
     const fs = filteredFacturas.filter(f=>f.mes===m && f.neto>0);
     return fs.length ? fs.reduce((s,f)=>s+f.neto,0)/fs.length : 0;
   });
+  chartTicket.data.labels = activeMeses.map(m => MESES_SHORT[m-1]);
   chartTicket.data.datasets[0].data = ticketMes;
   chartTicket.update('active');
 
@@ -2103,7 +2224,7 @@ function updateDash1() {
     const tkNeto = fs.length ? v/fs.length : 0;
     const tkBruto = fs.length ? bruto/fs.length : 0;
     const mesesActivos = [...new Set(fs.map(f=>f.mes))].sort();
-    const MNOMBRES = ['','Ene','Feb','Mar','Abr','May','Jun'];
+    const MNOMBRES = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
     const mesesStr = mesesActivos.map(m=>MNOMBRES[m]).join(', ');
     const promMensual = mesesActivos.length ? v/mesesActivos.length : 0;
     totNeto+=v; totIVA+=iva; totBruto+=bruto; totFact+=fs.length;
@@ -2144,22 +2265,63 @@ function updateDash1() {
   // Tabla facturas
   const tbodyF = document.getElementById('tabla-facturas');
   tbodyF.innerHTML = '';
-  const sortedF = [...filteredFacturas].sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
+  const MESES_ALL_FULL = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const sortedF = [...filteredFacturas].sort((a,b) => {
+    const na = parseInt((a.numero||'0').replace(/\D/g,'')) || 0;
+    const nb = parseInt((b.numero||'0').replace(/\D/g,'')) || 0;
+    return na - nb;
+  });
   document.getElementById('facturas-count').textContent = `${sortedF.length} documentos`;
   sortedF.forEach((f,i) => {
     if (!f.neto) return;
-    const mesNom = MESES_ALL[f.mes-1];
+    const mesNom = MESES_ALL_FULL[(f.mes||1)-1] || '';
     tbodyF.innerHTML += `
       <tr>
         <td style="color:var(--text-muted)">${i+1}</td>
         <td>${f.cliente.substring(0,45)}${f.cliente.length>45?'…':''}</td>
-        <td>${f.fecha}</td>
+        <td>${f.fecha||f.femision||'—'}</td>
         <td><span class="tag cyan">${mesNom}</span></td>
         <td class="r">${fmtFull(f.neto)}</td>
         <td class="r">${fmtFull(f.iva)}</td>
         <td class="r"><b>${fmtFull(f.neto+f.iva)}</b></td>
       </tr>`;
   });
+
+  // Totales del Registro de Facturas
+  const regNeto  = filteredFacturas.reduce((s,f)=>s+f.neto, 0);
+  const regIva   = filteredFacturas.reduce((s,f)=>s+f.iva,  0);
+  const regBruto = filteredFacturas.reduce((s,f)=>s+(f.neto+f.iva), 0);
+  const rnEl = document.getElementById('reg-total-neto');
+  const riEl = document.getElementById('reg-total-iva');
+  const rbEl = document.getElementById('reg-total-bruto');
+  if (rnEl) rnEl.textContent = fmtFull(regNeto);
+  if (riEl) riEl.textContent = fmtFull(regIva);
+  if (rbEl) rbEl.textContent = fmtFull(regBruto);
+
+  // Auto-propagar ingresos netos H2 a EER12 y todos los dashboards
+  const byMes = {};
+  filteredFacturas.forEach(f => { if (f.mes >= 7) byMes[f.mes] = (byMes[f.mes]||0) + f.neto; });
+  let propagated = false;
+  Object.entries(byMes).forEach(([mes, total]) => {
+    const idx = parseInt(mes) - 1; // 0-based EER12 index
+    if (EER12.ingNetos[idx] !== total) {
+      EER12.ingNetos[idx] = Math.round(total);
+      REAL_H2.ingNetos[idx - 6] = Math.round(total);
+      if (builtDash[3]) {
+        const el = document.getElementById('inp_ingNetos_' + (idx - 6));
+        if (el) { el.value = Math.round(total).toLocaleString('es-CL'); if (typeof previewInputRow === 'function') previewInputRow('ingNetos', idx - 6); }
+      }
+      propagated = true;
+    }
+  });
+  if (propagated) {
+    if (builtDash[0]) updateDirPeriod();
+    if (builtDash[2]) updateD2Charts();
+    if (builtDash[3]) { buildD4KPIs(); buildSemaforo(); buildAdvMetrics(); buildVarTable(); updateAnualCharts(); buildResumenAnual(); }
+    if (builtDash[5]) syncCFOToPeriod();
+    if (builtDash[6]) sc6BuildBase();
+    saveState();
+  }
 }
 
 function initDash1() {
@@ -2222,11 +2384,33 @@ function initDash1() {
 
   applyFilters();
   buildH2ClientesList();
+  updateCajaMesDisplay();
 }
 
 // ─── H2 FACTURAS ────────────────────────────────────────────
-const MESES_H2_NM = ['','','','','','','Julio','Agosto','Sep.','Octubre','Nov.','Dic.'];
-let H2_FACTURAS = [];
+const MESES_H2_NM = ['','Ene','Feb','Mar','Abr','May','Jun','Julio','Agosto','Sep.','Octubre','Nov.','Dic.'];
+let H2_FACTURAS_DEFAULT = [
+  {cliente:"Imagine Lab Chile SpA",        numero:"230", mes:7, femision:"2026-07-01", fvenc:"2026-07-13", neto:536333,  iva:101903, bruto:638236},
+  {cliente:"Imagine Co Spa",               numero:"231", mes:7, femision:"2026-07-01", fvenc:"2026-07-13", neto:536333,  iva:101903, bruto:638236},
+  {cliente:"Sociedad Comercial, inmobiliaria y de Inversiones EyR spa", numero:"232", mes:7, femision:"2026-06-20", fvenc:"2026-07-05", neto:180000,  iva:34200,  bruto:214200},
+  {cliente:"Sociedad Comercial, inmobiliaria y de Inversiones EyR spa", numero:"233", mes:7, femision:"2026-06-20", fvenc:"2026-07-05", neto:210000,  iva:39900,  bruto:249900},
+  {cliente:"Sociedad Comercial Ferretería Pino Y Sanchez Limitada",     numero:"234", mes:7, femision:"2026-07-06", fvenc:"2026-07-14", neto:300000,  iva:57000,  bruto:357000},
+  {cliente:"Servicios Automotrices Vanessa Carolina Rifo Bustamante",   numero:"235", mes:7, femision:"2026-07-15", fvenc:"2026-07-17", neto:1940000, iva:368600, bruto:2308600},
+  {cliente:"DISTRIBUIDORA DE PRODUCTOS PARA EL CALZADO LAS TRE",       numero:"236", mes:7, femision:"2026-07-15", fvenc:"2026-07-17", neto:1200000, iva:228000, bruto:1428000},
+  {cliente:"Inmobiliaria Elalba",          numero:"237", mes:7, femision:"2026-07-20", fvenc:"2026-08-05", neto:1091741, iva:207431, bruto:1299172},
+  {cliente:"INMOBILIARIA PARQUE DEL VOLCAN ORIENTE LTDA",               numero:"238", mes:7, femision:"2026-07-20", fvenc:"2026-08-05", neto:500000,  iva:95000,  bruto:595000},
+  {cliente:"S.PROMAT SPA",                numero:"239", mes:7, femision:"2026-07-20", fvenc:"2026-07-31", neto:100000,  iva:19000,  bruto:119000},
+  {cliente:"INMOBILAIRIA Y CONSTRUCTORA LOMAS LIMITADA",                numero:"240", mes:7, femision:"2026-07-20", fvenc:"2026-07-31", neto:504873,  iva:95926,  bruto:600799},
+  {cliente:"Comercializadora Ergos SpA",  numero:"241", mes:7, femision:"2026-07-20", fvenc:"2026-08-05", neto:1000000, iva:190000, bruto:1190000},
+  {cliente:"Inti Tech Spa",               numero:"242", mes:7, femision:"2026-07-20", fvenc:"2026-08-05", neto:1290000, iva:245100, bruto:1535100},
+  {cliente:"Distribuidora De Materiales Diezco Limitada",               numero:"243", mes:7, femision:"2026-07-20", fvenc:"2026-07-31", neto:1490000, iva:283100, bruto:1773100},
+  {cliente:"Sociedad Nordic Hands Spa",   numero:"244", mes:7, femision:"2026-07-20", fvenc:"2026-08-05", neto:1000000, iva:190000, bruto:1190000},
+  {cliente:"Tesla Energy S.A.",           numero:"245", mes:7, femision:"2026-07-20", fvenc:"2026-08-20", neto:840000,  iva:159600, bruto:999600},
+  {cliente:"Sociedad Comercial, inmobiliaria y de Inversiones EyR spa", numero:"246", mes:7, femision:"2026-07-20", fvenc:"2026-08-05", neto:1000000, iva:190000, bruto:1190000},
+  {cliente:"Sociedad Comercial, inmobiliaria y de Inversiones EyR spa", numero:"247", mes:7, femision:"2026-07-20", fvenc:"2026-08-05", neto:250000,  iva:47500,  bruto:297500}
+];
+let H2_FACTURAS = H2_FACTURAS_DEFAULT.map(f => ({...f}));
+let h2fEditIdx = -1; // -1 = modo agregar, >=0 = modo editar
 
 function buildH2ClientesList() {
   const dl = document.getElementById('h2f-clientes-list');
@@ -2258,11 +2442,55 @@ function addH2Factura() {
   }
   const iva   = Math.round(neto * 0.19);
   const bruto = neto + iva;
-  H2_FACTURAS.push({ cliente, numero, mes, femision, fvenc, neto: Math.round(neto), iva, bruto });
+  const factura = { cliente, numero, mes, femision, fvenc, neto: Math.round(neto), iva, bruto };
+  if (h2fEditIdx >= 0) {
+    H2_FACTURAS[h2fEditIdx] = factura;
+    h2fEditIdx = -1;
+    const btn = document.getElementById('h2f-add-btn');
+    if (btn) { btn.textContent = '+ Agregar'; btn.style.background = ''; }
+    const form = document.getElementById('h2f-form-row');
+    if (form) form.classList.remove('h2f-edit-mode');
+    const cancelBtn = document.getElementById('h2f-cancel-btn');
+    if (cancelBtn) cancelBtn.style.display = 'none';
+  } else {
+    H2_FACTURAS.push(factura);
+  }
   ['h2f-cliente','h2f-numero','h2f-femision','h2f-fvenc','h2f-neto','h2f-iva-prev','h2f-bruto-prev']
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   renderH2Facturas();
   saveState();
+}
+
+function editH2Factura(idx) {
+  const f = H2_FACTURAS[idx];
+  if (!f) return;
+  h2fEditIdx = idx;
+  document.getElementById('h2f-cliente').value  = f.cliente;
+  document.getElementById('h2f-numero').value   = f.numero || '';
+  document.getElementById('h2f-mes').value      = f.mes;
+  document.getElementById('h2f-femision').value = f.femision || '';
+  document.getElementById('h2f-fvenc').value    = f.fvenc || '';
+  document.getElementById('h2f-neto').value     = f.neto.toLocaleString('es-CL');
+  h2fCalcBruto();
+  const btn = document.getElementById('h2f-add-btn');
+  if (btn) { btn.textContent = '✓ Guardar cambios'; btn.style.background = 'var(--accent3)'; }
+  const form = document.getElementById('h2f-form-row');
+  if (form) form.classList.add('h2f-edit-mode');
+  const cancelBtn = document.getElementById('h2f-cancel-btn');
+  if (cancelBtn) cancelBtn.style.display = 'inline-block';
+  document.getElementById('h2f-cliente').focus();
+}
+
+function cancelH2Edit() {
+  h2fEditIdx = -1;
+  ['h2f-cliente','h2f-numero','h2f-femision','h2f-fvenc','h2f-neto','h2f-iva-prev','h2f-bruto-prev']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  const btn = document.getElementById('h2f-add-btn');
+  if (btn) { btn.textContent = '+ Agregar'; btn.style.background = ''; }
+  const form = document.getElementById('h2f-form-row');
+  if (form) form.classList.remove('h2f-edit-mode');
+  const cancelBtn = document.getElementById('h2f-cancel-btn');
+  if (cancelBtn) cancelBtn.style.display = 'none';
 }
 
 function removeH2Factura(idx) {
@@ -2279,7 +2507,12 @@ function renderH2Facturas() {
     tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:20px;font-size:.8rem">Sin facturas ingresadas — completa el formulario y presiona "+ Agregar"</td></tr>';
     if (cntEl) cntEl.textContent = '';
   } else {
-    tbody.innerHTML = H2_FACTURAS.map((f, i) =>
+    // Ordenar por número de factura (ascendente)
+    const sorted = H2_FACTURAS.map((f, i) => ({...f, _orig: i})).sort((a, b) => {
+      const na = parseInt(a.numero) || 0, nb = parseInt(b.numero) || 0;
+      return na - nb;
+    });
+    tbody.innerHTML = sorted.map((f) => { const i = f._orig; return (
       '<tr>' +
       '<td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + f.cliente + '</td>' +
       '<td>' + (f.numero || '—') + '</td>' +
@@ -2289,9 +2522,9 @@ function renderH2Facturas() {
       '<td style="color:var(--accent2)">' + fmtFull(f.neto)  + '</td>' +
       '<td style="color:var(--text-muted)">' + fmtFull(f.iva)   + '</td>' +
       '<td style="color:var(--accent3)">' + fmtFull(f.bruto) + '</td>' +
-      '<td><button class="h2f-del" onclick="removeH2Factura(' + i + ')" title="Eliminar">✕</button></td>' +
+      '<td style="white-space:nowrap"><button class="h2f-edit" onclick="editH2Factura(' + i + ')" title="Editar">✏️</button><button class="h2f-del" onclick="removeH2Factura(' + i + ')" title="Eliminar">✕</button></td>' +
       '</tr>'
-    ).join('');
+    ); }).join('');
     if (cntEl) cntEl.textContent = H2_FACTURAS.length + ' factura' + (H2_FACTURAS.length !== 1 ? 's' : '');
   }
   // Totals row
@@ -2304,10 +2537,10 @@ function renderH2Facturas() {
   if (tn) tn.textContent = fmtFull(totNeto);
   if (ti) ti.textContent = fmtFull(totIva);
   if (tb) tb.textContent = fmtFull(totBruto);
-  // Monthly chips
+  // Monthly chips — usa mes 1-based (7=Jul … 12=Dic)
   const byMes = {};
   H2_FACTURAS.forEach(f => { byMes[f.mes] = (byMes[f.mes] || 0) + f.neto; });
-  [6,7,8,9,10,11].forEach(m => {
+  [7,8,9,10,11,12].forEach(m => {
     const el = document.getElementById('h2f-mt-' + m);
     if (el) el.textContent = byMes[m] ? fmtFull(byMes[m]) : '$0';
   });
@@ -2317,12 +2550,12 @@ function syncFacturasToEjecutivo() {
   const byMes = {};
   H2_FACTURAS.forEach(f => { byMes[f.mes] = (byMes[f.mes] || 0) + f.neto; });
   let synced = 0;
-  [6,7,8,9,10,11].forEach(m => {
+  [7,8,9,10,11,12].forEach(m => {
     if (!byMes[m]) return;
-    const h2idx = m - 6; // 0=Jul … 5=Dic
+    const h2idx  = m - 7;  // 0-based REAL_H2 (0=Jul … 5=Dic)
+    const eer12i = m - 1;  // 0-based EER12   (6=Jul … 11=Dic)
     REAL_H2.ingNetos[h2idx] = Math.round(byMes[m]);
-    // Propagar directo a EER12 sin esperar "Aplicar datos reales"
-    EER12.ingNetos[m] = Math.round(byMes[m]);
+    EER12.ingNetos[eer12i]  = Math.round(byMes[m]);
     if (typeof builtDash !== 'undefined' && builtDash[3]) {
       const el = document.getElementById('inp_ingNetos_' + h2idx);
       if (el) {
@@ -4169,6 +4402,12 @@ document.addEventListener('DOMContentLoaded', function() {
 let dirCajaAct = 7032076;
 let dirCajaLibre = 0;
 let dirCajaManual = false; // true cuando usuario edita manualmente
+
+// ── Saldo de caja por mes (1-based, 1=Ene, 12=Dic)
+// { valor: Number, ts: ISO string, fecha_str: string legible }
+let CAJA_POR_MES = {
+  6: { valor: 7032076, ts: null, fecha_str: 'Valor inicial Jun 2026' }
+};
 let dirIngType = 'bar';
 const DIR_CH = {};
 const MESES_FULL = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
@@ -4191,17 +4430,140 @@ function getDirBurnMen() {
   return getCFOBurnMen();
 }
 
-function updateDirCaja() {
-  dirCajaManual = true; // usuario está editando manualmente
-  dirCajaAct = parseInp('dir-caja-inp');
+function previewDirCaja() {
+  // Vista previa mientras escribe — no guarda aún
+  dirCajaAct = parseInp('dir-caja-inp') || 0;
+  dirCajaManual = true;
+  const valEl = document.getElementById('dir-caja-val');
+  if (valEl) valEl.textContent = fmtFull(dirCajaAct);
+  buildDirBurnRunway();
+  buildDirProgress();
+}
+
+function saveDirCajaMes() {
+  const val = parseInp('dir-caja-inp');
+  if (!val || val <= 0) { alert('Ingresa un monto válido.'); return; }
+  const mes = activeMonths.length === 1 ? activeMonths[0] + 1 : null;
+  const now = new Date();
+  const fecha_str = now.toLocaleDateString('es-CL', {day:'2-digit',month:'2-digit',year:'numeric'})
+    + ' ' + now.toLocaleTimeString('es-CL', {hour:'2-digit',minute:'2-digit'});
+  if (mes) {
+    CAJA_POR_MES[mes] = { valor: val, ts: now.toISOString(), fecha_str: fecha_str };
+  }
+  dirCajaAct = val;
+  dirCajaManual = true;
   dirCajaLibre = parseInp('dir-libre-inp');
-  // Actualizar todos los indicadores del Directorio
+  _refreshDirCajaUI();
+  if (builtDash[1]) updateCajaMesDisplay(); // también actualiza la tarjeta en Ventas
+  saveState();
+  // Feedback
+  const btn = document.getElementById('dir-caja-save-btn');
+  if (btn) { const t = btn.textContent; btn.textContent = '✓'; btn.style.background = '#10b981';
+    setTimeout(() => { btn.textContent = t; btn.style.background = ''; }, 1800); }
+}
+
+function updateDirCaja() {
+  // Llamada desde el input de Caja Libre (que no tiene botón separado) — guarda directo
+  dirCajaManual = true;
+  dirCajaAct = parseInp('dir-caja-inp') || 0;
+  dirCajaLibre = parseInp('dir-libre-inp');
+  _refreshDirCajaUI();
+  saveState();
+}
+
+function _refreshDirCajaUI() {
   buildDirKPIs();
   buildDirBurnRunway();
   buildDirProgress();
   buildDirCostos();
   buildDirCashFlow();
+}
+
+// ─── CAJA POR MES ───────────────────────────────────────────
+function getCajaMesActivo() {
+  // Devuelve el número de mes 1-based si hay un solo mes seleccionado, si no null
+  return activeMonths.length === 1 ? activeMonths[0] + 1 : null;
+}
+
+function updateCajaMesDisplay() {
+  const valEl  = document.getElementById('cpm-val-display');
+  if (!valEl) return;
+  const lblEl  = document.getElementById('cpm-periodo-label');
+  const tsEl   = document.getElementById('cpm-ts-display');
+  const inpEl  = document.getElementById('cpm-inp');
+  const hintEl = document.getElementById('cpm-hint');
+  const MN = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const MF = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const mes = getCajaMesActivo();
+  if (mes) {
+    const d = CAJA_POR_MES[mes];
+    if (lblEl) lblEl.textContent = MF[mes] + ' 2026';
+    if (d && d.valor) {
+      valEl.textContent = fmtFull(d.valor);
+      if (tsEl) tsEl.textContent = '📅 Actualizado: ' + d.fecha_str;
+      if (inpEl) inpEl.value = d.valor.toLocaleString('es-CL');
+    } else {
+      valEl.textContent = '—';
+      if (tsEl) tsEl.textContent = 'Sin registrar';
+      if (inpEl) inpEl.value = '';
+    }
+    if (hintEl) hintEl.textContent = 'Se guardará para ' + MF[mes] + ' y actualizará Caja Actual en todos los dashboards';
+  } else {
+    if (lblEl) lblEl.textContent = 'Período ' + (PERIOD_LABEL[activePeriod] || activePeriod);
+    // Mostrar el último mes actualizado
+    const entries = Object.entries(CAJA_POR_MES).filter(([,d]) => d && d.valor).sort((a,b) => +a[0] - +b[0]);
+    if (entries.length) {
+      const [lastM, lastD] = entries[entries.length - 1];
+      valEl.textContent = fmtFull(lastD.valor);
+      if (tsEl) tsEl.textContent = '📅 Último: ' + MN[+lastM] + ' — ' + lastD.fecha_str;
+    } else {
+      valEl.textContent = '—';
+      if (tsEl) tsEl.textContent = 'Sin datos guardados';
+    }
+    if (inpEl) inpEl.value = '';
+    if (hintEl) hintEl.textContent = 'Selecciona un mes individual para ingresar o editar el saldo';
+  }
+  updateCajaMesHist();
+}
+
+function saveCajaMes() {
+  const mes = getCajaMesActivo();
+  if (!mes) { alert('Selecciona un mes individual en el filtro superior para guardar el saldo.'); return; }
+  const val = parseInp('cpm-inp');
+  if (!val || val <= 0) { alert('Ingresa un monto válido mayor a 0.'); return; }
+  const now = new Date();
+  const fecha_str = now.toLocaleDateString('es-CL', {day:'2-digit',month:'2-digit',year:'numeric'})
+    + ' ' + now.toLocaleTimeString('es-CL', {hour:'2-digit',minute:'2-digit'});
+  CAJA_POR_MES[mes] = { valor: val, ts: now.toISOString(), fecha_str: fecha_str };
+  // Propagar a dirCajaAct y al input del Directorio
+  dirCajaAct = val;
+  dirCajaManual = true;
+  const inpDir = document.getElementById('dir-caja-inp');
+  if (inpDir) inpDir.value = val.toLocaleString('es-CL');
+  updateCajaMesDisplay();
+  if (builtDash[0]) { buildDirKPIs(); buildDirBurnRunway(); buildDirProgress(); buildDirCashFlow(); }
   saveState();
+  // Feedback visual
+  const btn = document.getElementById('cpm-save-btn');
+  if (btn) { const orig = btn.textContent; btn.textContent = '✓ Guardado'; btn.style.background = 'var(--green,#22c55e)'; btn.style.color = '#000';
+    setTimeout(() => { btn.textContent = orig; btn.style.background = ''; btn.style.color = ''; }, 2000); }
+}
+
+function updateCajaMesHist() {
+  const el = document.getElementById('cpm-hist');
+  if (!el) return;
+  const MN = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  let html = '';
+  for (let m = 1; m <= 12; m++) {
+    const d = CAJA_POR_MES[m];
+    if (!d || !d.valor) continue;
+    const isAct = activeMonths.includes(m - 1);
+    html += '<div style="background:' + (isAct ? 'rgba(139,92,246,.18)' : 'var(--surface2)') + ';border:1px solid ' + (isAct ? 'var(--accent)' : 'var(--border)') + ';border-radius:6px;padding:5px 10px;min-width:80px;cursor:pointer" onclick="setPeriod(\'' + m + '\')" title="' + (d.fecha_str||'') + '">'
+      + '<div style="font-size:9px;color:var(--text-muted);font-weight:700;letter-spacing:.04em">' + MN[m] + '</div>'
+      + '<div style="font-size:12px;font-weight:800;color:var(--accent4)">' + fmtFull(d.valor) + '</div>'
+      + '</div>';
+  }
+  el.innerHTML = html || '<span style="font-size:11px;color:var(--text-muted)">Sin registros aún</span>';
 }
 
 function buildDirKPIs() {
@@ -4227,6 +4589,47 @@ function buildDirKPIs() {
   document.getElementById('dir-ebitda-badge').innerHTML = eb > 0
     ? '<span style="font-size:11px;background:rgba(16,185,129,.15);color:var(--accent3);padding:3px 8px;border-radius:20px;font-weight:600">↑ Mejor mes: ' + bestMes + '</span>'
     : '';
+  // ── Caja por mes: cargar valor guardado y mostrar timestamp / variación
+  const MN = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const mes = activeMonths.length === 1 ? activeMonths[0] + 1 : null;
+  const tsEl  = document.getElementById('dir-caja-ts');
+  const varEl = document.getElementById('dir-caja-var');
+  const inpEl = document.getElementById('dir-caja-inp');
+  if (mes) {
+    // Mes individual — cargar saldo guardado
+    const d = CAJA_POR_MES[mes];
+    if (d && d.valor && !dirCajaManual) {
+      dirCajaAct = d.valor;
+      if (inpEl) inpEl.value = d.valor.toLocaleString('es-CL');
+    } else if (!dirCajaManual && inpEl) {
+      inpEl.value = '';
+    }
+    if (tsEl) tsEl.textContent = (d && d.ts) ? '📅 ' + d.fecha_str : 'Sin registrar para ' + MN[mes];
+    if (varEl) varEl.innerHTML = '';
+  } else {
+    // Multi-mes: buscar primer y último mes del período con datos guardados
+    const periodoMeses = activeMonths.map(i => i + 1).sort((a,b) => a - b);
+    const conDatos = periodoMeses.filter(m => CAJA_POR_MES[m] && CAJA_POR_MES[m].valor);
+    if (conDatos.length >= 2) {
+      const mIni = conDatos[0], mFin = conDatos[conDatos.length - 1];
+      const dIni = CAJA_POR_MES[mIni], dFin = CAJA_POR_MES[mFin];
+      const delta = dFin.valor - dIni.valor;
+      const pct = dIni.valor ? ((delta / dIni.valor) * 100).toFixed(1) : 0;
+      const col = delta >= 0 ? '#10b981' : '#ef4444';
+      const arrow = delta >= 0 ? '▲' : '▼';
+      if (!dirCajaManual) { dirCajaAct = dFin.valor; if (inpEl) inpEl.value = dFin.valor.toLocaleString('es-CL'); }
+      if (varEl) varEl.innerHTML = '<span style="color:' + col + ';font-weight:700">' + arrow + ' ' + fmtFull(Math.abs(delta)) + ' (' + Math.abs(pct) + '%)</span> <span style="color:var(--text-muted);font-size:9px">' + MN[mIni] + '→' + MN[mFin] + '</span>';
+      if (tsEl) tsEl.textContent = '📅 Último: ' + MN[mFin] + ' — ' + dFin.fecha_str;
+    } else if (conDatos.length === 1) {
+      const m = conDatos[0], d = CAJA_POR_MES[m];
+      if (!dirCajaManual) { dirCajaAct = d.valor; if (inpEl) inpEl.value = d.valor.toLocaleString('es-CL'); }
+      if (tsEl) tsEl.textContent = '📅 ' + MN[m] + ' — ' + d.fecha_str;
+      if (varEl) varEl.innerHTML = '';
+    } else {
+      if (tsEl) tsEl.textContent = 'Sin datos guardados en este período';
+      if (varEl) varEl.innerHTML = '';
+    }
+  }
   document.getElementById('dir-caja-val').textContent = fmtFull(dirCajaAct);
   document.getElementById('dir-libre-val').textContent = fmtFull(dirCajaLibre);
 }
